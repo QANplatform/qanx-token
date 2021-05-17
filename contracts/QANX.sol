@@ -1,7 +1,7 @@
 
-////////////////////////////////////////////////////
-// QANX STARTS HERE, PURE OPENZEPPELIN CODE ABOVE //
-////////////////////////////////////////////////////
+///////////////////////////////////////////////
+// QANX STARTS HERE, OPENZEPPELIN CODE ABOVE //
+///////////////////////////////////////////////
 
 contract QANX is ERC20, Ownable {
 
@@ -36,13 +36,53 @@ contract QANX is ERC20, Ownable {
     // TRANSFER FUNCTION WITH LOCK PARAMETERS
     function transferLocked(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) public returns (bool) {
 
-        // ONLY ONE LOCKED TRANSACTION ALLOWED
+        // ONLY ONE LOCKED TRANSACTION ALLOWED PER RECIPIENT
         require(_locks[recipient].tokenAmount == 0, "Only one lock per address allowed!");
-        
-        // REGISTER LOCK
-        _locks[recipient] = Lock(amount, hardLockUntil, softLockUntil, allowedHops, 0);
 
-        // MAKE ACTUAL TRANSFER
-        _transfer(_msgSender(), recipient, amount);
+        // SENDER MUST HAVE ENOUGH TOKENS (UNLOCKED + LOCKED BALANCE COMBINED)
+        require(_balances[_msgSender()] + _locks[_msgSender()].tokenAmount >= amount, "Transfer amount exceeds balance");
+
+        // IF SENDER HAS ENOUGH UNLOCKED BALANCE, THEN LOCK PARAMS CAN BE CHOSEN
+        if(_balances[_msgSender()] >= amount){
+
+            // DEDUCT SENDER BALANCE
+            _balances[_msgSender()] = _balances[_msgSender()] - amount;
+
+            // APPLY LOCK
+            return _applyLock(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+        }
+
+        // OTHERWISE REQUIRE THAT THE CHOSEN LOCK PARAMS ARE SAME / STRICTER (allowedHops) THAN THE SENDER'S
+        require(
+            hardLockUntil >= _locks[_msgSender()].hardLockUntil && 
+            softLockUntil >= _locks[_msgSender()].softLockUntil && 
+            allowedHops < _locks[_msgSender()].allowedHops
+        );
+
+        // IF SENDER HAS ENOUGH LOCKED BALANCE
+        if(_locks[_msgSender()].tokenAmount >= amount){
+
+            // DECREASE LOCKED BALANCE OF SENDER
+            _locks[_msgSender()].tokenAmount = _locks[_msgSender()].tokenAmount - amount;
+
+            // APPLY LOCK
+            return _applyLock(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+        }
+
+        // IF NO CONDITIONS WERE MET SO FAR, SPEND LOCKED BALANCE OF SENDER FIRST
+        _locks[_msgSender()].tokenAmount = 0;
+
+        // THEN DEDUCT THE REMAINDER FROM THE UNLOCKED BALANCE
+        _balances[_msgSender()] = _balances[_msgSender()] - (amount - _locks[_msgSender()].tokenAmount);
+
+        // APPLY LOCK
+        return _applyLock(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+    }
+
+    // APPLIES LOCK TO RECIPIENT WITH SPECIFIED PARAMS AND EMITS A TRANSFER EVENT
+    function _applyLock(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) private returns (bool) {
+        _locks[recipient] = Lock(amount, hardLockUntil, softLockUntil, allowedHops, 0);
+        emit Transfer(_msgSender(), recipient, amount);
+        return true;
     }
 }
