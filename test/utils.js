@@ -5,6 +5,7 @@ module.exports = {
     acc: accounts => {
         const accMap =  {
             creator: accounts[0],
+            lockedReceiver: accounts[1],
             random: seed => {
                 return '0x' + crypto.createHash('sha256')
                     .update(seed)
@@ -34,5 +35,9 @@ module.exports = {
 
     timeout: function(ms){
         return new Promise(resolve => setTimeout(resolve, ms));
+    },
+
+    timestamp: function(deltaSeconds){
+        return Math.floor(+ new Date / 1000) + parseInt(deltaSeconds ? deltaSeconds : 0);
     }
 }

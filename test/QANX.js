@@ -12,6 +12,9 @@ contract("QANX", async accounts =>{
     // CREATE NEW INSTANCE OF QANX
     before(async () => {
         Q = await QANX.new();
+
+        // PRINT ACCOUNT MAP
+        console.log("\n\nACCOUNTS :: ", acc, "\n\n");
     });
 
     // INITIALIZE CONTRACT
@@ -36,5 +39,37 @@ contract("QANX", async accounts =>{
         let receiverBalance = await Q.balanceOf(acc.random('transferBeneficiary'));
         assert.equal(creatorPostBalance.toString(), creatorPreBalance.sub(transferAmount).toString(), 'creator postBalance mistmatch!');
         assert.equal(receiverBalance.toString(), transferAmount.toString(), 'Receiver balance mismatch!');
+    });
+
+    // TEST LOCKED TRANSFER
+    it('should perform a locked transfer', async () => {
+
+        // DEFINE LOCK PARAMS
+        const lock = {
+            tokenAmount: utils.bn(utils.eth2wei('100000')),
+            hardLockUntil: utils.timestamp(+60),
+            softLockUntil: utils.timestamp(+120),
+            allowedHops: 0
+        };
+
+        const creatorPreBalance = await Q.balanceOf(acc.creator);
+        await Q.transferLocked(
+            acc.lockedReceiver,
+            lock.tokenAmount,
+            lock.hardLockUntil,
+            lock.softLockUntil,
+            lock.allowedHops
+        );
+
+        const creatorPostBalance = await Q.balanceOf(acc.creator);
+        const receiverBalance = await Q.balanceOf(acc.lockedReceiver);
+
+        assert.equal(creatorPostBalance.toString(), creatorPreBalance.sub(lock.tokenAmount).toString(), 'creator postBalance mistmatch!');
+        assert.equal(receiverBalance.toString(), lock.tokenAmount.toString(), 'Receiver balance mismatch!');
+
+        const regLock = await Q.lockOf(acc.lockedReceiver);
+        for(const lockKey in lock){
+            assert.equal(regLock[lockKey].toString(), lock[lockKey].toString(), `${lockKey} was not registered correctly!`);
+        }
     });
 });
