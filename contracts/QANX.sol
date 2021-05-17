@@ -30,7 +30,7 @@ contract QANX is ERC20, Ownable {
     }
 
     // TRANSFER FUNCTION WITH LOCK PARAMETERS
-    function transferLocked(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) public {
+    function transferLocked(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) public returns (bool) {
 
         // ONLY ONE LOCKED TRANSACTION ALLOWED
         require(_locks[recipient].tokenAmount == 0, "Only one lock per address allowed!");
