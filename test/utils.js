@@ -4,11 +4,7 @@ module.exports = {
 
     acc: accounts => {
         const accMap =  {
-            owner: accounts[0],
-            cancelledBuyer: accounts[1],
-            lateBuyer: accounts[2],
-            purchasingBuyer: accounts[3],
-            etherClaimBeneficiary: accounts[4],
+            creator: accounts[0],
             random: seed => {
                 return '0x' + crypto.createHash('sha256')
                     .update(seed)

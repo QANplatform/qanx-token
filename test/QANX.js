@@ -23,7 +23,18 @@ contract("QANX", async accounts =>{
 
     // FUND CREATOR'S ADDRESS
     it('should fund contract creator address with total supply', async () => {
-        let balance = await Q.balanceOf(acc.owner);
+        let balance = await Q.balanceOf(acc.creator);
         assert.equal(balance.toString(), utils.eth2wei('333333000'));
+    });
+
+    // TEST NORMAL TRANSFER
+    it('should perform a regular transfer', async () => {
+        let transferAmount = utils.bn(utils.eth2wei('200000'));
+        let creatorPreBalance = await Q.balanceOf(acc.creator);
+        await Q.transfer(acc.random('transferBeneficiary'), transferAmount);
+        let creatorPostBalance = await Q.balanceOf(acc.creator);
+        let receiverBalance = await Q.balanceOf(acc.random('transferBeneficiary'));
+        assert.equal(creatorPostBalance.toString(), creatorPreBalance.sub(transferAmount).toString(), 'creator postBalance mistmatch!');
+        assert.equal(receiverBalance.toString(), transferAmount.toString(), 'Receiver balance mismatch!');
     });
 });
