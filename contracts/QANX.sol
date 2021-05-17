@@ -29,6 +29,10 @@ contract QANX is ERC20, Ownable {
         return _locks[account];
     }
 
+    function balanceOf(address account) public view virtual override returns (uint256) {
+        return _balances[account] + _locks[account].tokenAmount;
+    }
+
     // TRANSFER FUNCTION WITH LOCK PARAMETERS
     function transferLocked(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) public returns (bool) {
 
