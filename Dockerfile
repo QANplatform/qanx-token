@@ -22,9 +22,6 @@ RUN sed -i '/SPDX-License-Identifier/d' /tmp/erc20.sol && \
 RUN sed -i '1s;^;pragma solidity ^0.8.0\;;'          /tmp/erc20.sol && \
     sed -i '1s;^;// SPDX-License-Identifier: MIT\n;' /tmp/erc20.sol
 
-# MAKE OPENZEPPELIN ERC20 CONTRACT ABSTRACT
-RUN sed -i 's/contract ERC20/abstract contract ERC20/' /tmp/erc20.sol
-
 # MAKE THE _balances PROPERTY ACCESSIBLE TO INHERITING CONTRACT
 RUN sed -i 's/private _balances/internal _balances/' /tmp/erc20.sol
 
