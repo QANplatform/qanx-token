@@ -29,6 +29,7 @@ contract QANX is ERC20, Ownable {
         return _locks[account];
     }
 
+    // RETURN THE BALANCE OF UNLOCKED AND LOCKED TOKENS COMBINED
     function balanceOf(address account) public view virtual override returns (uint256) {
         return _balances[account] + _locks[account].tokenAmount;
     }
