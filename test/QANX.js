@@ -141,8 +141,8 @@ contract("QANX", async accounts =>{
             await utils.timeout(1000);
         }
         // RANDOM TX TO INCREASE block.timestamp IN TEST ENVIRONMENT
+        await utils.timeout(2000);
         await web3.eth.sendTransaction({from: accounts[0], to: accounts[0], value: 0 });
-        await utils.timeout(1000);
 
         await Q.unlock(acc.lockedReceiver);
         const lockedBalanceOf = await Q.lockedBalanceOf(acc.lockedReceiver);
