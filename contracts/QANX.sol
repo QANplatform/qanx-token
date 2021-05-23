@@ -82,7 +82,12 @@ contract QANX is ERC20, Ownable {
 
     // APPLIES LOCK TO RECIPIENT WITH SPECIFIED PARAMS AND EMITS A TRANSFER EVENT
     function _applyLock(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) private returns (bool) {
-        _locks[recipient] = Lock(amount, hardLockUntil, softLockUntil, allowedHops, 0);
+
+        // MAKE SURE THAT SOFTLOCK IS AFTER HARDLOCK
+        require(softLockUntil > hardLockUntil, "SoftLock must be greater than HardLock!");
+
+        // APPLY LOCK, EMIT TRANSFER EVENT
+        _locks[recipient] = Lock(amount, hardLockUntil, softLockUntil, allowedHops, hardLockUntil, amount / (softLockUntil - hardLockUntil));
         emit Transfer(_msgSender(), recipient, amount);
         return true;
     }
