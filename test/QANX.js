@@ -210,4 +210,51 @@ contract("QANX", async accounts =>{
             await utils.timeout(1000);
         }
     });
+
+    it('should gradually unlock the balance between hard and softLock', async () => {
+
+        const regLock = await Q.lockOf(acc.lockedReceiver);
+
+        while(regLock.hardLockUntil >= utils.timestamp()){
+            await utils.timeout(2000);
+        }
+
+        let previousUnlocked = utils.bn('0');
+
+        // LOOP WHILE THE SOFTLOCK PERIOD LASTS
+        while(regLock.softLockUntil > utils.timestamp()){
+
+            // RANDOM TX TO INCREASE block.timestamp IN TEST ENVIRONMENT
+            await web3.eth.sendTransaction({from: accounts[0], to: accounts[0], value: 0 });
+
+            // UNLOCK AS MUCH BALANCE AS POSSIBLE
+            await Q.unlock(acc.lockedReceiver, {from: acc.lockedReceiver});
+
+            // GET UNLOCKABLE BALANCE AT THE CURRENT TIME
+            const unlocked = await Q.unlockedBalanceOf(acc.lockedReceiver);
+
+            // CURRENT UNLOCKABLE AMOUNT SHOULD BE GREATER THAN THE PREVIOUS AMOUNT AS TIME PASSES
+            assert(parseInt(utils.wei2eth(previousUnlocked)) < parseInt(utils.wei2eth(unlocked)), "Unlocked balance did not increase!");
+
+            // SET PREVIOUS UNLOCKABLE AMOUNT TO CURRENT ONE, WAIT 1s+ UNTIL NEXT CYCLE
+            previousUnlocked = unlocked;
+            await utils.timeout(1100);
+        }
+
+        // RANDOM TX TO INCREASE block.timestamp IN TEST ENVIRONMENT
+        await utils.timeout(2000);
+        await web3.eth.sendTransaction({from: accounts[0], to: accounts[0], value: 0 });
+        
+        // UNLOCK THE REST OF THE BALANCE IF THERE IS ANYTHING LEFT
+        try{
+            await Q.unlock(acc.lockedReceiver, {from: acc.lockedReceiver});
+        }catch(e){}
+        
+        const locked = await Q.lockedBalanceOf(acc.lockedReceiver);
+        const unlocked = await Q.unlockedBalanceOf(acc.lockedReceiver);
+        const total = await Q.balanceOf(acc.lockedReceiver);
+
+        assert.equal(locked.toString(), '0');
+        assert.equal(unlocked.toString(), total.toString());
+    });
 });
