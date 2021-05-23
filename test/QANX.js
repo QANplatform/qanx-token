@@ -134,4 +134,18 @@ contract("QANX", async accounts =>{
         }
         assert.equal(actualError, expectedError);        
     });
+
+    it('should unlock whole amount and delete lock', async () => {
+        const regLock = await Q.lockOf(acc.lockedReceiver);
+        while(regLock.softLockUntil > utils.timestamp()){
+            await utils.timeout(1000);
+        }
+        // RANDOM TX TO INCREASE block.timestamp IN TEST ENVIRONMENT
+        await web3.eth.sendTransaction({from: accounts[0], to: accounts[0], value: 0 });
+        await utils.timeout(1000);
+
+        await Q.unlock(acc.lockedReceiver);
+        const lockedBalanceOf = await Q.lockedBalanceOf(acc.lockedReceiver);
+        assert.equal(lockedBalanceOf.toString(), '0', "unlock() method failed!");
+    });
 });
