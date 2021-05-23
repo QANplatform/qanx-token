@@ -101,6 +101,10 @@ contract QANX is ERC20, Ownable {
         return _locks[account].tokenAmount;
     }
 
+    function unlockedBalanceOf(address account) public view virtual returns (uint256) {
+        return _balances[account];
+    }
+
     function unlockableBalanceOf(address account) public view virtual returns (uint256) {
 
         // IF THE HARDLOCK HAS NOT PASSED YET, THERE ARE NO UNLOCKABLE TOKENS
