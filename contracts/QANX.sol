@@ -124,11 +124,11 @@ contract QANX is ERC20, Ownable {
 
     function unlock(address account) public returns (bool) {
 
-        // ONLY ADDRESSES OWNING LOCKED TOKENS AND BYPASSED HARDLOCK TIME ARE UNLOCKABLE
-        require(_locks[account].tokenAmount > 0 && block.timestamp > _locks[account].hardLockUntil, "No unlockable tokens!");
-
         // CALCULATE UNLOCKABLE BALANCE
         uint256 unlockable = unlockableBalanceOf(account);
+
+        // ONLY ADDRESSES OWNING LOCKED TOKENS AND BYPASSED HARDLOCK TIME ARE UNLOCKABLE
+        require(unlockable > 0 && _locks[account].tokenAmount > 0 && block.timestamp > _locks[account].hardLockUntil, "No unlockable tokens!");
 
         // SET LAST UNLOCK TIME, DEDUCT FROM LOCKED BALANCE & CREDIT TO REGULAR BALANCE
         _locks[account].lastUnlock = block.timestamp;
