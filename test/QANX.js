@@ -148,4 +148,26 @@ contract("QANX", async accounts =>{
         const lockedBalanceOf = await Q.lockedBalanceOf(acc.lockedReceiver);
         assert.equal(lockedBalanceOf.toString(), '0', "unlock() method failed!");
     });
+
+    it('should not let allow negative hops', async () => {
+
+        // SHOULD NOT LET UNLOCK BALANCE
+        const expectedError = 'value out-of-bounds';
+        let actualError;
+        try {
+            await Q.transferLocked(
+                acc.lockedReceiver,
+                utils.bn(utils.eth2wei('1')),
+                utils.timestamp(),
+                utils.timestamp(),
+                -1
+            );
+        } catch (e) {
+            if(e && e.reason){
+                actualError = e.reason;
+            }
+        }
+        assert.equal(actualError, expectedError);        
+    });
+
 });
