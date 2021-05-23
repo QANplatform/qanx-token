@@ -75,4 +75,42 @@ contract("QANX", async accounts =>{
         const lockedBalanceOf = await Q.lockedBalanceOf(acc.lockedReceiver);
         assert.equal(lockedBalanceOf.toString(), lock.tokenAmount.toString(), "lockedBalanceOf() method failed!");
     });
+
+    it('unlockableBalanceOf should increase as time is passing', async () => {
+        
+        const regLock = await Q.lockOf(acc.lockedReceiver);
+
+        // WHILE HARDLOCK DID NOT PASS
+        while(regLock.hardLockUntil > utils.timestamp()){
+
+            // UNLOCKABLE BALANCE SHOULD BE ZERO
+            const unlockable = await Q.unlockableBalanceOf(acc.lockedReceiver);
+            assert.equal(unlockable.toString(), '0', "Unlockable balance was not zero before hardlock passed!");
+
+            // PRINT INFORMATIVE WAITING MESSAGE
+            console.log(`Waiting ${regLock.hardLockUntil - utils.timestamp()} seconds until hardlock passes...`)
+            await utils.timeout(5000);
+        }
+        console.log("Hardlock passed!");
+        await utils.timeout(2000);
+
+        let previousUnlockable = utils.bn('0');
+
+        // LOOP WHILE THE SOFTLOCK PERIOD LASTS
+        while(regLock.softLockUntil > utils.timestamp()){
+
+            // RANDOM TX TO INCREASE block.timestamp IN TEST ENVIRONMENT
+            await web3.eth.sendTransaction({from: accounts[0], to: accounts[0], value: 0 });
+
+            // GET UNLOCKABLE BALANCE AT THE CURRENT TIME
+            const unlockable = await Q.unlockableBalanceOf(acc.lockedReceiver);
+
+            // CURRENT UNLOCKABLE AMOUNT SHOULD BE GREATER THAN THE PREVIOUS AMOUNT AS TIME PASSES
+            assert(parseInt(utils.wei2eth(previousUnlockable)) < parseInt(utils.wei2eth(unlockable)), "Unlockable amount did not increase!");
+
+            // SET PREVIOUS UNLOCKABLE AMOUNT TO CURRENT ONE, WAIT 1s+ UNTIL NEXT CYCLE
+            previousUnlockable = unlockable;
+            await utils.timeout(1100);
+        }
+    });
 });
