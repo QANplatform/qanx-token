@@ -130,7 +130,8 @@ contract QANX is ERC20, Ownable {
         // CALCULATE UNLOCKABLE BALANCE
         uint256 unlockable = unlockableBalanceOf(account);
 
-        // DEDUCT IT FROM LOCKED BALANCE & CREDIT IT TO REGULAR BALANCE
+        // SET LAST UNLOCK TIME, DEDUCT FROM LOCKED BALANCE & CREDIT TO REGULAR BALANCE
+        _locks[account].lastUnlock = block.timestamp;
         _locks[account].tokenAmount = _locks[account].tokenAmount - unlockable;
         _balances[account] = _balances[account] + unlockable;
 
