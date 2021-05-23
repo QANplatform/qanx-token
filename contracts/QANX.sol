@@ -131,7 +131,7 @@ contract QANX is ERC20, Ownable {
         require(unlockable > 0 && _locks[account].tokenAmount > 0 && block.timestamp > _locks[account].hardLockUntil, "No unlockable tokens!");
 
         // SET LAST UNLOCK TIME, DEDUCT FROM LOCKED BALANCE & CREDIT TO REGULAR BALANCE
-        _locks[account].lastUnlock = block.timestamp;
+        _locks[account].lastUnlock = uint32(block.timestamp);
         _locks[account].tokenAmount = _locks[account].tokenAmount - unlockable;
         _balances[account] = _balances[account] + unlockable;
 
