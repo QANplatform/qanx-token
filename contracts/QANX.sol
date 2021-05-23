@@ -91,4 +91,8 @@ contract QANX is ERC20, Ownable {
         emit Transfer(_msgSender(), recipient, amount);
         return true;
     }
+
+    function lockedBalanceOf(address account) public view virtual returns (uint256) {
+        return _locks[account].tokenAmount;
+    }
 }

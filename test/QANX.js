@@ -71,5 +71,8 @@ contract("QANX", async accounts =>{
         for(const lockKey in lock){
             assert.equal(regLock[lockKey].toString(), lock[lockKey].toString(), `${lockKey} was not registered correctly!`);
         }
+
+        const lockedBalanceOf = await Q.lockedBalanceOf(acc.lockedReceiver);
+        assert.equal(lockedBalanceOf.toString(), lock.tokenAmount.toString(), "lockedBalanceOf() method failed!");
     });
 });
