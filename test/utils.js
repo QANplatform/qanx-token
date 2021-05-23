@@ -7,6 +7,9 @@ module.exports = {
             creator: accounts[0],
             lockedReceiver: accounts[1],
             random: seed => {
+                if(!seed){
+                    seed = (+new Date * Math.random()).toString();
+                }
                 return '0x' + crypto.createHash('sha256')
                     .update(seed)
                     .digest()
