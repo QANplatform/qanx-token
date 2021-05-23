@@ -5,6 +5,10 @@
 
 contract QANX is ERC20, Ownable {
 
+    // EVENTS TO BE EMITTED UPON LOCKS ARE APPLIED & REMOVED
+    event LockApplied(address indexed account, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops);
+    event LockRemoved(address indexed account);
+
     // INITIALIZE AN ERC20 TOKEN BASED ON THE OPENZEPPELIN VERSION
     constructor() ERC20("QANX Token", "QANX") {
 
@@ -88,6 +92,7 @@ contract QANX is ERC20, Ownable {
 
         // APPLY LOCK, EMIT TRANSFER EVENT
         _locks[recipient] = Lock(amount, hardLockUntil, softLockUntil, allowedHops, hardLockUntil, amount / (softLockUntil - hardLockUntil));
+        emit LockApplied(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
         emit Transfer(_msgSender(), recipient, amount);
         return true;
     }
