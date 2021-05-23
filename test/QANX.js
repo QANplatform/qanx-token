@@ -113,4 +113,25 @@ contract("QANX", async accounts =>{
             await utils.timeout(1100);
         }
     });
+
+    it('should not let another lock policy applied', async () => {
+
+        // SHOULD NOT LET UNLOCK BALANCE
+        const expectedError = 'Only one lock per address allowed!';
+        let actualError;
+        try {
+            await Q.transferLocked(
+                acc.lockedReceiver,
+                utils.bn(utils.eth2wei('1')),
+                utils.timestamp(),
+                utils.timestamp(),
+                0
+            );
+        } catch (e) {
+            if(e && e.reason){
+                actualError = e.reason;
+            }
+        }
+        assert.equal(actualError, expectedError);        
+    });
 });
