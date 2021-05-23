@@ -9,7 +9,7 @@ contract QANX is ERC20, Ownable {
     constructor() ERC20("QANX Token", "QANX") {
 
         // INITIALLY MINT TOTAL SUPPLY TO CREATOR
-        _mint(_msgSender(), 333333000 * (10 ** 18));
+        _mint(_msgSender(), 3333333000 * (10 ** 18));
     }
 
     // REPRESENTS A LOCK WHICH MIGHT BE APPLIED ON AN ADDRESS

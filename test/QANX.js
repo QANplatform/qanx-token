@@ -20,14 +20,14 @@ contract("QANX", async accounts =>{
     // INITIALIZE CONTRACT
     it('should init the QANX contract with correct total supply', async () => {
         let totalSupply = await Q.totalSupply();
-        assert.equal(totalSupply.toString(), utils.eth2wei('333333000'));
+        assert.equal(totalSupply.toString(), utils.eth2wei('3333333000'));
         
     });
 
     // FUND CREATOR'S ADDRESS
     it('should fund contract creator address with total supply', async () => {
         let balance = await Q.balanceOf(acc.creator);
-        assert.equal(balance.toString(), utils.eth2wei('333333000'));
+        assert.equal(balance.toString(), utils.eth2wei('3333333000'));
     });
 
     // TEST NORMAL TRANSFER
