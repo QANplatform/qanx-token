@@ -257,4 +257,72 @@ contract("QANX", async accounts =>{
         assert.equal(locked.toString(), '0');
         assert.equal(unlocked.toString(), total.toString());
     });
+
+    it('should fail to transfer locked tokens further', async () => {
+
+        // DEFINE LOCK PARAMS
+        const lock = {
+            tokenAmount: utils.bn(utils.eth2wei('100000')),
+            hardLockUntil: utils.timestamp(+15),
+            softLockUntil: utils.timestamp(+30),
+            allowedHops: 0
+        };
+
+        await Q.transferLocked(
+            acc.furtherTransferFail,
+            lock.tokenAmount,
+            lock.hardLockUntil,
+            lock.softLockUntil,
+            lock.allowedHops
+        );
+
+        // SHOULD NOT LET TRANSFER FURTHER
+        try {
+            await Q.transferLocked(
+                acc.random(),
+                utils.bn(utils.eth2wei('50000')),
+                lock.hardLockUntil,
+                lock.softLockUntil,
+                lock.allowedHops,
+                {from: acc.furtherTransferFail}
+            );
+            assert.equal(1, 0);
+        } catch (e) {
+            assert.equal(1, 1);
+        }
+    });
+
+    it('should allow to transfer locked tokens further', async () => {
+
+        // DEFINE LOCK PARAMS
+        const lock = {
+            tokenAmount: utils.bn(utils.eth2wei('100000')),
+            hardLockUntil: utils.timestamp(+15),
+            softLockUntil: utils.timestamp(+30),
+            allowedHops: 1
+        };
+
+        await Q.transferLocked(
+            acc.furtherTransferOK,
+            lock.tokenAmount,
+            lock.hardLockUntil,
+            lock.softLockUntil,
+            lock.allowedHops
+        );
+
+        // SHOULD NOT LET TRANSFER FURTHER
+        try {
+            await Q.transferLocked(
+                acc.random(),
+                utils.bn(utils.eth2wei('100000')),
+                lock.hardLockUntil,
+                lock.softLockUntil,
+                lock.allowedHops - 1,
+                {from: acc.furtherTransferOK}
+            );
+            assert.equal(1, 1);
+        } catch (e) {
+            assert.equal(1, 0);
+        }
+    });
 });

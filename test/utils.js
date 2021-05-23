@@ -6,6 +6,8 @@ module.exports = {
         const accMap =  {
             creator: accounts[0],
             lockedReceiver: accounts[1],
+            furtherTransferFail: accounts[2],
+            furtherTransferOK: accounts[3],
             random: seed => {
                 if(!seed){
                     seed = (+new Date * Math.random()).toString();
