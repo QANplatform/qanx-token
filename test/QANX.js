@@ -170,4 +170,44 @@ contract("QANX", async accounts =>{
         assert.equal(actualError, expectedError);        
     });
 
+    it('should not be able to call unlock() before hardlocktime', async () => {
+
+        // DEFINE LOCK PARAMS
+        const lock = {
+            tokenAmount: utils.bn(utils.eth2wei('500000')),
+            hardLockUntil: utils.timestamp(+15),
+            softLockUntil: utils.timestamp(+30),
+            allowedHops: 0
+        };
+
+        await Q.transferLocked(
+            acc.lockedReceiver,
+            lock.tokenAmount,
+            lock.hardLockUntil,
+            lock.softLockUntil,
+            lock.allowedHops
+        );
+
+        const regLock = await Q.lockOf(acc.lockedReceiver);
+        for(const lockKey in lock){
+            assert.equal(regLock[lockKey].toString(), lock[lockKey].toString(), `${lockKey} was not registered correctly!`);
+        }
+
+        while(regLock.hardLockUntil > utils.timestamp()){
+
+            // SHOULD NOT LET UNLOCK BALANCE
+            const expectedError = 'No unlockable tokens!';
+            let actualError;
+            try {
+                await Q.unlock(acc.lockedReceiver);
+            } catch (e) {
+                if(e && e.reason){
+                    actualError = e.reason;
+                    console.log(`Expected error "${actualError}" caught at ${utils.timestamp()} UNIX`);
+                }
+            }
+            assert.equal(actualError, expectedError);
+            await utils.timeout(1000);
+        }
+    });
 });
