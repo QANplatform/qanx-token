@@ -47,8 +47,8 @@ contract("QANX", async accounts =>{
         // DEFINE LOCK PARAMS
         const lock = {
             tokenAmount: utils.bn(utils.eth2wei('100000')),
-            hardLockUntil: utils.timestamp(+60),
-            softLockUntil: utils.timestamp(+120),
+            hardLockUntil: utils.timestamp(+15),
+            softLockUntil: utils.timestamp(+30),
             allowedHops: 0
         };
 
