@@ -100,4 +100,20 @@ contract QANX is ERC20, Ownable {
     function lockedBalanceOf(address account) public view virtual returns (uint256) {
         return _locks[account].tokenAmount;
     }
+
+    function unlockableBalanceOf(address account) public view virtual returns (uint256) {
+
+        // IF THE HARDLOCK HAS NOT PASSED YET, THERE ARE NO UNLOCKABLE TOKENS
+        if(block.timestamp < _locks[account].hardLockUntil) {
+            return 0;
+        }
+
+        // IF THE SOFTLOCK PERIOD PASSED, ALL CURRENTLY TOKENS ARE UNLOCKABLE
+        if(block.timestamp > _locks[account].softLockUntil) {
+            return _locks[account].tokenAmount;
+        }
+
+        // OTHERWISE THE PROPORTIONAL AMOUNT IS UNLOCKABLE
+        return (block.timestamp - _locks[account].lastUnlock) * _locks[account].unlockPerSec;
+    }
 }
