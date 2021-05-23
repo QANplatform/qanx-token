@@ -23,6 +23,7 @@ contract QANX is ERC20, Ownable {
         uint32 softLockUntil;   // UNTIL WHEN LOCKED TOKENS CAN BE GRADUALLY RELEASED
         uint8 allowedHops;      // HOW MANY TRANSFERS LEFT WITH SAME LOCK PARAMS
         uint32 lastUnlock;      // LAST GRADUAL UNLOCK TIME (SOFTLOCK PERIOD)
+        uint256 unlockPerSec;   // HOW MANY TOKENS ARE UNLOCKABLE EACH SEC FROM HL -> SL
     }
 
     // THIS MAPS LOCK PARAMS TO CERTAIN ADDRESSES WHICH RECEIVED LOCKED TOKENS
@@ -119,5 +120,28 @@ contract QANX is ERC20, Ownable {
 
         // OTHERWISE THE PROPORTIONAL AMOUNT IS UNLOCKABLE
         return (block.timestamp - _locks[account].lastUnlock) * _locks[account].unlockPerSec;
+    }
+
+    function unlock(address account) public returns (bool) {
+
+        // ONLY ADDRESSES OWNING LOCKED TOKENS AND BYPASSED HARDLOCK TIME ARE UNLOCKABLE
+        require(_locks[account].tokenAmount > 0 && block.timestamp > _locks[account].hardLockUntil, "No unlockable tokens!");
+
+        // CALCULATE UNLOCKABLE BALANCE
+        uint256 unlockable = unlockableBalanceOf(account);
+
+        // DEDUCT IT FROM LOCKED BALANCE & CREDIT IT TO REGULAR BALANCE
+        _locks[account].tokenAmount = _locks[account].tokenAmount - unlockable;
+        _balances[account] = _balances[account] + unlockable;
+
+        // IF NO MORE LOCKED TOKENS LEFT, REMOVE LOCK OBJECT FROM ADDRESS
+        if(_locks[account].tokenAmount == 0){
+            delete _locks[account];
+            emit LockRemoved(account);
+        }
+
+        // UNLOCK SUCCESSFUL
+        emit Transfer(account, account, unlockable);
+        return true;
     }
 }
