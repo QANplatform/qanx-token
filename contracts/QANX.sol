@@ -16,6 +16,19 @@ contract QANX is ERC20 {
         _mint(_msgSender(), 3333333000 * (10 ** 18));
     }
 
+    // MAPPING FOR QUANTUM PUBLIC KEY HASHES
+    mapping (address => bytes32) private _qPubKeyHashes;
+
+    // REGISTER QUANTUM PUBLIC KEY HASH OF THE CURRENT ACCOUNT
+    function setQuantumPubkeyHash(bytes32 qPubKeyHash) public {
+        _qPubKeyHashes[_msgSender()] = qPubKeyHash;
+    }
+
+    // QUERY A QUANTUM PUBLIC KEY HASH OF A GIVEN ACCOUNT
+    function getQuantumPubkeyHash(address account) public view virtual returns (bytes32) {
+        return _qPubKeyHashes[account];
+    }
+
     // REPRESENTS A LOCK WHICH MIGHT BE APPLIED ON AN ADDRESS
     struct Lock {
         uint256 tokenAmount;    // HOW MANY TOKENS ARE LOCKED

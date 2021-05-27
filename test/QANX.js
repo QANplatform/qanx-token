@@ -1,5 +1,6 @@
 const QANX = artifacts.require('QANX');
 const utils = require('./utils');
+const crypto = require('crypto');
 
 contract("QANX", async accounts =>{
 
@@ -15,6 +16,13 @@ contract("QANX", async accounts =>{
 
         // PRINT ACCOUNT MAP
         console.log("\n\nACCOUNTS :: ", acc, "\n\n");
+    });
+
+    it('should register quantum pubkey hash', async () => {
+        const pubkeyHash = crypto.randomBytes(32);
+        await Q.setQuantumPubkeyHash(pubkeyHash, {from: acc.quantumKeyCheck});
+        const readBack = await Q.getQuantumPubkeyHash(acc.quantumKeyCheck);
+        assert.equal('0x' + pubkeyHash.toString('hex'), readBack.toString('hex'));
     });
 
     // INITIALIZE CONTRACT
