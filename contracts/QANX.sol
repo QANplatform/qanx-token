@@ -3,7 +3,7 @@
 // QANX STARTS HERE, OPENZEPPELIN CODE ABOVE //
 ///////////////////////////////////////////////
 
-contract QANX is ERC20, Ownable {
+contract QANX is ERC20 {
 
     // EVENTS TO BE EMITTED UPON LOCKS ARE APPLIED & REMOVED
     event LockApplied(address indexed account, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops);

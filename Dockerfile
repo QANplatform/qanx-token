@@ -10,7 +10,6 @@ COPY . .
 # DOWNLOAD OFFICIAL OPENZEPPELIN IMPLEMENTATIONS TO BE EXTENDED
 RUN wget -O- "$OZ_REPO/contracts/token/ERC20/IERC20.sol" >> /tmp/erc20.sol && \
     wget -O- "$OZ_REPO/contracts/utils/Context.sol"      >> /tmp/erc20.sol && \
-    wget -O- "$OZ_REPO/contracts/access/Ownable.sol"     >> /tmp/erc20.sol && \
     wget -O- "$OZ_REPO/contracts/token/ERC20/ERC20.sol"  >> /tmp/erc20.sol
 
 # ALL THE REQUIRED SOLIDITY FILES WERE CONCATENATED, DELETE UNNECESSARY LINES
