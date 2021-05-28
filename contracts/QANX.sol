@@ -88,11 +88,11 @@ contract QANX is ERC20 {
             return _applyLock(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
         }
 
-        // IF NO CONDITIONS WERE MET SO FAR, SPEND LOCKED BALANCE OF SENDER FIRST
-        _locks[_msgSender()].tokenAmount = 0;
-
-        // THEN DEDUCT THE REMAINDER FROM THE UNLOCKED BALANCE
+        // IF NO CONDITIONS WERE MET SO FAR, DEDUCT FROM THE UNLOCKED BALANCE
         _balances[_msgSender()] = _balances[_msgSender()] - (amount - _locks[_msgSender()].tokenAmount);
+
+        // THEN SPEND LOCKED BALANCE OF SENDER FIRST
+        _locks[_msgSender()].tokenAmount = 0;
 
         // APPLY LOCK
         return _applyLock(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
