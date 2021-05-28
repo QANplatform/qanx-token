@@ -24,6 +24,19 @@ RUN sed -i '1s;^;pragma solidity ^0.8.0\;;'          /tmp/erc20.sol && \
 # MAKE THE _balances PROPERTY ACCESSIBLE TO INHERITING CONTRACT
 RUN sed -i 's/private _balances/internal _balances/' /tmp/erc20.sol
 
+# PATCH FUNCTION VISIBILITIES FROM "public" TO "external" WHICH ARE NOT CALLED FROM INSIDE THE CONTRACT
+RUN sed -i 's/function name() public/function name() external/' /tmp/erc20.sol && \
+    sed -i 's/function symbol() public/function symbol() external/' /tmp/erc20.sol && \
+    sed -i 's/function decimals() public/function decimals() external/' /tmp/erc20.sol && \
+    sed -i 's/function totalSupply() public/function totalSupply() external/' /tmp/erc20.sol && \
+    sed -i 's/function balanceOf(address account) public/function balanceOf(address account) external/' /tmp/erc20.sol && \
+    sed -i 's/function transfer(address recipient, uint256 amount) public/function transfer(address recipient, uint256 amount) external/' /tmp/erc20.sol && \
+    sed -i 's/function allowance(address owner, address spender) public/function allowance(address owner, address spender) external/' /tmp/erc20.sol && \
+    sed -i 's/function approve(address spender, uint256 amount) public/function approve(address spender, uint256 amount) external/' /tmp/erc20.sol && \
+    sed -i 's/function transferFrom(address sender, address recipient, uint256 amount) public/function transferFrom(address sender, address recipient, uint256 amount) external/' /tmp/erc20.sol && \
+    sed -i 's/function increaseAllowance(address spender, uint256 addedValue) public/function increaseAllowance(address spender, uint256 addedValue) external/' /tmp/erc20.sol && \
+    sed -i 's/function decreaseAllowance(address spender, uint256 subtractedValue) public/function decreaseAllowance(address spender, uint256 subtractedValue) external/' /tmp/erc20.sol
+
 # APPEND QANX.sol CONTRACT TO THE OPENZEPPELIN ORIGINAL
 RUN cat contracts/QANX.sol >> /tmp/erc20.sol && \
     cat /tmp/erc20.sol > contracts/QANX.sol
