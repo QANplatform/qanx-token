@@ -20,12 +20,12 @@ contract QANX is ERC20 {
     mapping (address => bytes32) private _qPubKeyHashes;
 
     // REGISTER QUANTUM PUBLIC KEY HASH OF THE CURRENT ACCOUNT
-    function setQuantumPubkeyHash(bytes32 qPubKeyHash) public {
+    function setQuantumPubkeyHash(bytes32 qPubKeyHash) external {
         _qPubKeyHashes[_msgSender()] = qPubKeyHash;
     }
 
     // QUERY A QUANTUM PUBLIC KEY HASH OF A GIVEN ACCOUNT
-    function getQuantumPubkeyHash(address account) public view virtual returns (bytes32) {
+    function getQuantumPubkeyHash(address account) external view virtual returns (bytes32) {
         return _qPubKeyHashes[account];
     }
 
@@ -43,17 +43,17 @@ contract QANX is ERC20 {
     mapping (address => Lock) private _locks;
 
     // RETURNS LOCK INFORMATION OF A GIVEN ADDRESS
-    function lockOf(address account) public view virtual returns (Lock memory) {
+    function lockOf(address account) external view virtual returns (Lock memory) {
         return _locks[account];
     }
 
     // RETURN THE BALANCE OF UNLOCKED AND LOCKED TOKENS COMBINED
-    function balanceOf(address account) public view virtual override returns (uint256) {
+    function balanceOf(address account) external view virtual override returns (uint256) {
         return _balances[account] + _locks[account].tokenAmount;
     }
 
     // TRANSFER FUNCTION WITH LOCK PARAMETERS
-    function transferLocked(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) public returns (bool) {
+    function transferLocked(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) external returns (bool) {
 
         // ONLY ONE LOCKED TRANSACTION ALLOWED PER RECIPIENT
         require(_locks[recipient].tokenAmount == 0, "Only one lock per address allowed!");
@@ -111,11 +111,11 @@ contract QANX is ERC20 {
         return true;
     }
 
-    function lockedBalanceOf(address account) public view virtual returns (uint256) {
+    function lockedBalanceOf(address account) external view virtual returns (uint256) {
         return _locks[account].tokenAmount;
     }
 
-    function unlockedBalanceOf(address account) public view virtual returns (uint256) {
+    function unlockedBalanceOf(address account) external view virtual returns (uint256) {
         return _balances[account];
     }
 
@@ -135,7 +135,7 @@ contract QANX is ERC20 {
         return (block.timestamp - _locks[account].lastUnlock) * _locks[account].unlockPerSec;
     }
 
-    function unlock(address account) public returns (bool) {
+    function unlock(address account) external returns (bool) {
 
         // CALCULATE UNLOCKABLE BALANCE
         uint256 unlockable = unlockableBalanceOf(account);
