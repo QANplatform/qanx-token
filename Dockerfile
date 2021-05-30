@@ -38,6 +38,8 @@ RUN sed -i 's/function name() public/function name() external/' /tmp/erc20.sol &
     sed -i 's/function decreaseAllowance(address spender, uint256 subtractedValue) public/function decreaseAllowance(address spender, uint256 subtractedValue) external/' /tmp/erc20.sol
 
 # APPEND QANX.sol CONTRACT TO THE OPENZEPPELIN ORIGINAL
-RUN cat contracts/QANX.sol >> /tmp/erc20.sol && \
-    cat /tmp/erc20.sol > contracts/QANX.sol
+RUN cat contracts/QANX_pure.sol >> /tmp/erc20.sol && \
+    cat /tmp/erc20.sol > contracts/QANX_pure.sol && \
+    sha256sum contracts/QANX_pure.sol && \
+    sha256sum contracts/QANX.sol
 
