@@ -6,6 +6,11 @@ QANX token is an ERC20/BEP20 compliant token optimized for trading on Decentrali
 
 The QANX token is also prepared with a mapping designed to store Post-Quantum cryptography public key hashes, which will technically enable a direct migration from the ERC20 and BEP20 tokens to QANplatform's upcoming native mainnet units which will utilize PQ cryptography by default.
 
+You can browse the live instances of QANX smart contracts below:
+
+- ETH (ERC20): [0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa](https://etherscan.io/token/0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa) [ Ethereum ]
+- BSC (BEP20): [0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa](https://bscscan.com/token/0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa) [ Binance Smart Chain ]
+
 ---
 
 ## Audit by CertiK <img align="right" src="./audit/certik-badge.png">
