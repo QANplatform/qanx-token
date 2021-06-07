@@ -21,4 +21,18 @@ contract DistributeQANX {
             require(_qanx.transfer(recipients[i], amounts[i]));
         }
     }
+
+    function distributeLocked(
+        uint256 total,
+        address[] calldata recipients,
+        uint256[] calldata amounts,
+        uint32[]  calldata hardLocks, 
+        uint32[]  calldata softLocks,
+        uint8[]   calldata allowedHops) external 
+    {
+        require(_qanx.transferFrom(msg.sender, address(this), total));
+        for (uint256 i = 0; i < recipients.length; i++){
+            require(_qanx.transferLocked(recipients[i], amounts[i], hardLocks[i], softLocks[i], allowedHops[i]));
+        }
+    }
 }
