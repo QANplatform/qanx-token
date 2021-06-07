@@ -9,6 +9,8 @@ module.exports = {
             furtherTransferFail: accounts[2],
             furtherTransferOK: accounts[3],
             quantumKeyCheck: accounts[4],
+            distributeRecv: accounts[5],
+            distributeLockedRecv: accounts[6],
             random: seed => {
                 if(!seed){
                     seed = (+new Date * Math.random()).toString();
