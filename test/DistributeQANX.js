@@ -62,4 +62,36 @@ contract("DistributeQANX", async accounts => {
         assert.equal(receiverBalance.toString(), transferAmount.toString(), 'Receiver balance mismatch!');
     });
 
+    it('should distribute locked tokens randomly', async () => {
+        const params = {
+            recipients: [acc.distributeLockedRecv],
+            amounts: [utils.eth2wei(lockedFurtherTransferable)],
+            hardLocks: [utils.timestamp(+30)],
+            softLocks: [utils.timestamp(+60)],
+            allowedHops: [1]
+        }
+        let amount, total = lockedFurtherTransferable;
+        for(let i = 1; i < 5; i++){
+            params.recipients[i] = acc.random('locked' + i);
+            amount = Math.floor(Math.random() * 1000000);
+            total += amount;
+            params.amounts[i] = utils.eth2wei(amount);
+            params.hardLocks[i] = utils.timestamp(+600);
+            params.softLocks[i] = utils.timestamp(+900);
+            params.allowedHops[i] = 0;
+        }
+        await Q.approve(DQ.address, utils.eth2wei(total));
+        await DQ.distributeLocked(utils.eth2wei(total), params.recipients, params.amounts, params.hardLocks, params.softLocks, params.allowedHops);
+
+        for(const i in params.recipients){
+            const balance = await Q.balanceOf(params.recipients[i]);
+            const lockedBalance = await Q.lockedBalanceOf(params.recipients[i]);
+            const unlockedBalance = await Q.unlockedBalanceOf(params.recipients[i]);
+            console.log(`${params.recipients[i]} :: ${params.amounts[i]}`);
+            assert.equal(balance.toString(), params.amounts[i]);
+            assert.equal(balance.toString(), lockedBalance.toString());
+            assert.equal(unlockedBalance.toString(), '0');
+        }
+    });
+
 });
