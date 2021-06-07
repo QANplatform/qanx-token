@@ -71,7 +71,7 @@ contract("DistributeQANX", async accounts => {
             allowedHops: [1]
         }
         let amount, total = lockedFurtherTransferable;
-        for(let i = 1; i < 5; i++){
+        for(let i = 1; i < 50; i++){
             params.recipients[i] = acc.random('locked' + i);
             amount = Math.floor(Math.random() * 1000000);
             total += amount;
