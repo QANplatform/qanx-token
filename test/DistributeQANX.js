@@ -94,4 +94,20 @@ contract("DistributeQANX", async accounts => {
         }
     });
 
+    it('should transfer distributed locked token further', async () => {
+        let transferAmount = utils.bn(utils.eth2wei(lockedFurtherTransferable));
+        let lockedRecvPreBalance = await Q.balanceOf(acc.distributeLockedRecv);
+        await Q.transferLocked(
+            acc.random('transferBeneficiary2'),
+            transferAmount,
+            utils.timestamp(+300),
+            utils.timestamp(+301),
+            0,
+            {from: acc.distributeLockedRecv}
+        );
+        let lockedRecvPostBalance = await Q.balanceOf(acc.distributeLockedRecv);
+        let receiverBalance = await Q.balanceOf(acc.random('transferBeneficiary2'));
+        assert.equal(lockedRecvPostBalance.toString(), lockedRecvPreBalance.sub(transferAmount).toString(), 'Sender postBalance mistmatch!');
+        assert.equal(receiverBalance.toString(), transferAmount.toString(), 'Receiver balance mismatch!');
+    });
 });
