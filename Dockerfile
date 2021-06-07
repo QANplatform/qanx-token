@@ -45,3 +45,5 @@ RUN cat contracts/QANX_pure.sol >> /tmp/erc20.sol && \
 RUN sha256sum contracts/QANX_pure.sol && \
     sha256sum contracts/QANX.sol
 
+# REMOVE THE "PURE" VERSION DUPLICATE AFTER INTEGRITY CHECK PASSED
+RUN rm contracts/QANX_pure.sol
