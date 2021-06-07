@@ -13,7 +13,7 @@ module.exports = {
             distributeLockedRecv: accounts[6],
             random: seed => {
                 if(!seed){
-                    seed = (+new Date * Math.random()).toString();
+                    seed = crypto.randomBytes(32).toString('hex');
                 }
                 return '0x' + crypto.createHash('sha256')
                     .update(seed)
