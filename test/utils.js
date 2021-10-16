@@ -11,6 +11,9 @@ module.exports = {
             quantumKeyCheck: accounts[4],
             distributeRecv: accounts[5],
             distributeLockedRecv: accounts[6],
+            signer: accounts[7],
+            signerDelegator: accounts[8],
+            bridgeBeneficiary: accounts[9],
             random: seed => {
                 if(!seed){
                     seed = crypto.randomBytes(32).toString('hex');
