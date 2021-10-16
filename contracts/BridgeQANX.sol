@@ -50,12 +50,7 @@ contract Signed {
 contract BridgeQANX is Signed {
 
     // POINTS TO THE OFFICIAL QANX CONTRACT
-    TransferableERC20 private _qanx;
-
-    // ADDRESS OF THE OFFICIAL QANX CONTRACT WILL BE PROVIDED UPON CONSTRUCT
-    constructor(TransferableERC20 qanx_) Signed() {
-        _qanx = qanx_;
-    }
+    TransferableERC20 private _qanx = TransferableERC20(0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa);
 
     // REPRESENTS A BRIDGE TRANSACTION
     struct BridgeTX {
