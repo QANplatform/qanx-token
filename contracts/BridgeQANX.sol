@@ -125,6 +125,11 @@ contract BridgeQANX is Signed {
     uint256 private feePercentage;
     uint256 private feesCollected;
 
+    // FEE TRANSPARENCY FUNCTION
+    function getFeeInfo() external view returns (uint256[2] memory) {
+        return [feePercentage, feesCollected];
+    }
+
     // SETTER FOR FEE PERCENTAGE (MAX 5%)
     function setFeePercentage(uint8 _feePercentage) external {
         require(signers[msg.sender] > 0 && _feePercentage <= 5);
