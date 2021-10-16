@@ -9,32 +9,24 @@ interface TransferableERC20 {
 
 contract Signed {
 
-    // THE ADDRESS PERMITTED TO SIGN WITHDRAWAL REQUESTS
-    address internal signer;
+    // THE ADDRESSES PERMITTED TO SIGN WITHDRAWAL REQUESTS UP TO X AMOUNT
+    mapping(address => uint256) internal signers;
 
-    // THE ADDRESS PERMITTED TO SET WITHDRAWAL SIGNER ADDRESS
-    address private signerDelegator;
-
-    // SET OPERATOR ADDRESS TO CONTRACT DEPLOYER BY DEFAULT
+    // SET NO LIMIT SIGNER ON DEPLOYMENT
     constructor() {
-        signerDelegator = msg.sender;
+        signers[msg.sender] = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     }
 
-    /*inline test support fnc*/ function getAddress(uint8 role) external view returns (address) { if(role == 0) return signer; if(role == 1) return signerDelegator; return address(0);}
+    /*inline test support fnc*/ function getLimit(address signer) external view returns (uint256) { return signers[signer]; }
 
     // METHOD TO SET WITHDRAWAL SIGNER / OPERATOR ADDRESS
-    function setAddress(uint8 role, address newAddress) external {
-        require(msg.sender == signerDelegator);
-        if(role == 0) {
-            signer = newAddress;
-        }
-        if(role == 1) {
-            signerDelegator = newAddress;
-        }
+    function setSigner(address signer, uint256 limit) external {
+        require(signers[msg.sender] == 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+        signers[signer] = limit;
     }
 
     // METHOD TO VERIFY WITHDRAWAL SIGNATURE OF A GIVEN TXID
-    function verifySignature(bytes32 txid, bytes memory signature) internal view returns (bool) {
+    function verifySignature(bytes32 txid, bytes memory signature, uint256 amount) internal view returns (bool) {
 
         // SIGNATURE VARIABLES FOR ECRECOVER
         bytes32 r;
@@ -51,7 +43,7 @@ contract Signed {
         uint8 v = 27 + uint8(uint256(vs) >> 255);
 
         // RECOVER & VERIFY SIGNER IDENTITY
-        return ecrecover(txid, v, r, s) == signer;
+        return amount < signers[ecrecover(txid, v, r, s)];
     }
 }
 
@@ -86,7 +78,7 @@ contract BridgeQANX is Signed {
 
     // FETCH NONCE BASED ON KEY AND SIGNATURE
     function getNonce(bytes32 nonceKey, bytes calldata signature) external view returns (uint256) {
-        require(verifySignature(nonceKey, signature), "ERR_SIG");
+        require(verifySignature(nonceKey, signature, 0), "ERR_SIG");
         return _nonces[nonceKey];
     }
 
@@ -115,7 +107,7 @@ contract BridgeQANX is Signed {
         bytes32 txid = keccak256(abi.encode(nonceKey, _nonces[nonceKey]++, beneficiary, amount));
         
         // VERIFY SIGNATURE
-        require(verifySignature(txid, signature), "ERR_SIG");
+        require(verifySignature(txid, signature, amount), "ERR_SIG");
 
         // REGISTER BRIDGE TX
         _btxs[txid] = BridgeTX(beneficiary, amount, depositChainId, block.chainid);
@@ -135,13 +127,13 @@ contract BridgeQANX is Signed {
 
     // SETTER FOR FEE PERCENTAGE (MAX 5%)
     function setFeePercentage(uint8 _feePercentage) external {
-        require(msg.sender == signer && _feePercentage <= 5);
+        require(signers[msg.sender] > 0 && _feePercentage <= 5);
         feePercentage = _feePercentage;
     }
 
     // METHOD TO WITHDRAW TOTAL COLLECTED FEES SO FAR
     function withdrawFees(address beneficiary) external {
-        require(msg.sender == signer);
+        require(signers[msg.sender] > 0);
         require(_qanx.transfer(beneficiary, feesCollected), "ERR_TXN");
         feesCollected = 0;
     }
