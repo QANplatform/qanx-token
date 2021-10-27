@@ -52,43 +52,22 @@ contract BridgeQANX is Signed {
     // POINTS TO THE OFFICIAL QANX CONTRACT
     TransferableERC20 private _qanx = TransferableERC20(0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa);
 
-    // REPRESENTS A BRIDGE TRANSACTION
-    struct BridgeTX {
-        address beneficiary;      // BENEFICIARY ON WITHDRAWAL CHAIN
-        uint256 amount;           // AMOUNT WITHDRAWABLE
-        uint256 depositChainId;   // CHAIN ID OF THE DEPOSIT CHAIN
-        uint256 withdrawChainId;  // CHAIN ID OF THE WITHDRAWAL CHAIN
-    }
+    // STORES NONCES FOR CROSS-CHAIN TRANSFERS (msg.sender => depositChainId => withdrawChainId = nonce)
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) private _nonces;
 
-    // HOLDS ALL BRIDGE TRANSACTIONS MAPPED BY THEIR KECCAK256 HASH
-    mapping (bytes32 => BridgeTX) private _btxs;
-
-    // STORES NONCES FOR CROSS-CHAIN TRANSFERS
-    mapping (bytes32 => uint256) private _nonces;
-
-    // QUERY A BRIDGE TRANSACTION BY HASH
-    function getBridgeTx(bytes32 btxHash) external view returns (BridgeTX memory) {
-        return _btxs[btxHash];
-    }
-
-    // FETCH NONCE BASED ON KEY AND SIGNATURE
-    function getNonce(bytes32 nonceKey, bytes calldata signature) external view returns (uint256) {
-        require(verifySignature(nonceKey, signature, 0), "ERR_SIG");
-        return _nonces[nonceKey];
+    // FETCH NONCE OF SENDER BASED ON CHAIN IDS
+    function getNonce(address sender, uint256 depositChainId, uint256 withdrawChainId) external view returns (uint256) {
+        return _nonces[sender][depositChainId][withdrawChainId];
     }
 
     // DEPOSIT TOKENS ON THE SOURCE CHAIN OF THE BRIDGE
     function bridgeDeposit(address beneficiary, uint256 amount, uint256 withdrawChainId) external returns (bytes32) {
 
         // CALCULATE TXID AND INCREMENT NONCE
-        bytes32 nonceKey = keccak256(abi.encode(msg.sender, block.chainid, withdrawChainId));
-        bytes32 txid = keccak256(abi.encode(nonceKey, _nonces[nonceKey]++, beneficiary, amount));
+        bytes32 txid = keccak256(abi.encode(msg.sender, block.chainid, withdrawChainId, _nonces[msg.sender][block.chainid][withdrawChainId]++, beneficiary, amount));
 
         // TRANSFER TOKENS FROM MSG SENDER TO THIS CONTRACT FOR THE AMOUNT TO BE BRIDGED
         require(_qanx.transferFrom(msg.sender, address(this), amount));
-
-        // REGISTER BRIDGE TX
-        _btxs[txid] = BridgeTX(beneficiary, amount, block.chainid, withdrawChainId);
 
         // RETURN TXID
         return txid;
@@ -98,14 +77,10 @@ contract BridgeQANX is Signed {
     function bridgeWithdraw(address beneficiary, uint256 amount, uint256 depositChainId, bytes calldata signature) external returns (bool) {
 
         // CALCULATE TXID AND INCREMENT NONCE
-        bytes32 nonceKey = keccak256(abi.encode(msg.sender, depositChainId, block.chainid));
-        bytes32 txid = keccak256(abi.encode(nonceKey, _nonces[nonceKey]++, beneficiary, amount));
+        bytes32 txid = keccak256(abi.encode(msg.sender, depositChainId, block.chainid, _nonces[msg.sender][depositChainId][block.chainid]++, beneficiary, amount));
         
         // VERIFY SIGNATURE
         require(verifySignature(txid, signature, amount), "ERR_SIG");
-
-        // REGISTER BRIDGE TX
-        _btxs[txid] = BridgeTX(beneficiary, amount, depositChainId, block.chainid);
 
         // COLLECT FEE
         uint256 fee = amount / 100 * feePercentage;
