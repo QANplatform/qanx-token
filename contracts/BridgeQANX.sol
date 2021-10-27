@@ -17,13 +17,13 @@ contract Signed {
         signers[msg.sender] = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     }
 
-    // METHOD TO SET WITHDRAWAL SIGNER / OPERATOR ADDRESS
+    // METHOD TO SET WITHDRAWAL SIGNER ADDRESSES
     function setSigner(address signer, uint256 limit) external {
         require(signer != address(0) && signers[msg.sender] == 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
         signers[signer] = limit;
     }
 
-    // METHOD TO VERIFY WITHDRAWAL SIGNATURE OF A GIVEN TXID
+    // METHOD TO VERIFY WITHDRAWAL SIGNATURE OF A GIVEN TXID & AMOUNT
     function verifySignature(bytes32 txid, bytes memory signature, uint256 amount) internal view returns (bool) {
 
         // SIGNATURE VARIABLES FOR ECRECOVER
@@ -40,7 +40,7 @@ contract Signed {
         bytes32 s = vs & 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
         uint8 v = 27 + uint8(uint256(vs) >> 255);
 
-        // RECOVER & VERIFY SIGNER IDENTITY
+        // RECOVER & VERIFY SIGNER IDENTITY RELATED TO AMOUNT
         return amount < signers[ecrecover(txid, v, r, s)];
     }
 }
@@ -58,8 +58,8 @@ contract BridgeQANX is Signed {
         return _nonces[sender][depositChainId][withdrawChainId];
     }
 
-    // DEPOSIT TOKENS ON THE SOURCE CHAIN OF THE BRIDGE
-    function bridgeDeposit(address beneficiary, uint256 amount, uint256 withdrawChainId) external returns (bytes32) {
+    // SEND IN TOKENS ON THE SOURCE CHAIN OF THE BRIDGE
+    function bridgeSend(address beneficiary, uint256 amount, uint256 withdrawChainId) external returns (bytes32) {
 
         // CALCULATE TXID AND INCREMENT NONCE
         bytes32 txid = keccak256(abi.encode(msg.sender, block.chainid, withdrawChainId, _nonces[msg.sender][block.chainid][withdrawChainId]++, beneficiary, amount));
