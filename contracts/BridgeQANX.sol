@@ -21,8 +21,7 @@ contract Signed {
 
     // METHOD TO SET WITHDRAWAL SIGNER / OPERATOR ADDRESS
     function setSigner(address signer, uint256 limit) external {
-        require(signer != address(0));
-        require(signers[msg.sender] == 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+        require(signer != address(0) && signers[msg.sender] == 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
         signers[signer] = limit;
     }
 
