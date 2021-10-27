@@ -17,8 +17,6 @@ contract Signed {
         signers[msg.sender] = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     }
 
-    /*inline test support fnc*/ function getLimit(address signer) external view returns (uint256) { return signers[signer]; }
-
     // METHOD TO SET WITHDRAWAL SIGNER / OPERATOR ADDRESS
     function setSigner(address signer, uint256 limit) external {
         require(signer != address(0) && signers[msg.sender] == 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
