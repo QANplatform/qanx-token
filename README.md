@@ -22,6 +22,16 @@ CertiK leads blockchain security by pioneering the use of cutting-edge Formal Ve
 Other than QANX the audit firm CertiK was also assigned to audit the recognizable PancakeSwap, 1inch, Tether and Matic just to name a few.
 
 ---
+
+## Audit by Hacken <img align="right" src="./audit/hacken-badge.png">
+
+We are proud that QANX smart contract passed Hacken's audit excellently. You can find the audit report [here](./audit/REP-QANX-2021-05-28.pdf).
+
+Hacken is a leading cybersecurity consulting company with an essential focus on blockchain security. Hacken Cybersecurity Services is a part of Hacken Group, including CER.live, HackenAI, and HackenProof. From June 2020, CER.live is the unique cybersecurity data provider for CoinGecko Trust Score.
+
+Other than QANX the audit firm Hacken was also assigned to audit the recognizable Gate.io, FTX, Bithumb Global, and 1inch just to name a few.
+
+---
 ## How to compile & test
 
 If you are still curious about how QANX works and want to verify yourself (awesome, you always should!), you can compile and test it easily with Docker. Just run the following command:
