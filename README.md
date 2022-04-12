@@ -25,7 +25,7 @@ Other than QANX the audit firm CertiK was also assigned to audit the recognizabl
 
 ## Audit by Hacken <img align="right" src="./audit/hacken-badge.png">
 
-We are proud that QANX smart contract passed Hacken's audit excellently. You can find the audit report [here](./audit/REP-QANX-2021-05-28.pdf).
+We are proud that QANX smart contract passed Hacken's audit excellently. You can find the audit report [here](./audit/Hacken-QANplatform-29032022.pdf).
 
 Hacken is a leading cybersecurity consulting company with an essential focus on blockchain security. Hacken Cybersecurity Services is a part of Hacken Group, including CER.live, HackenAI, and HackenProof. From June 2020, CER.live is the unique cybersecurity data provider for CoinGecko Trust Score.
 
