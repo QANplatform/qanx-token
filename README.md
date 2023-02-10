@@ -4,15 +4,32 @@
 
 QANX token is an ERC20/BEP20 compliant token optimized for trading on Decentralized Exchanges (DEX) with customizable locking and vesting options included.
 
-The QANX token is also prepared with a mapping designed to store Post-Quantum cryptography public key hashes, which will technically enable a direct migration from the ERC20 and BEP20 tokens to QANplatform's upcoming native mainnet units which will utilize PQ cryptography by default.
+A previous version of the QANX token was also prepared with a mapping designed to store Post-Quantum cryptography public key hashes, which will technically enable a direct migration from the ERC20 and BEP20 tokens to QANplatform's upcoming native mainnet units which will utilize PQ cryptography by default.
+
+In the current iteration this functionality is removed from the QANX token contract, as the XLINK protocol allowing the PQ migration desribed above will enable ANY Ethereum account to make the migration to QAN's mainnet without the requirement of QANX token ownership. For this reason the XLINK helper contract enabling this functionality will be uploaded to GitHub as a new project in a separete repository and deployed on the respective networks later, after which this doumentation will be updated to reflect the resulting contract address.
 
 You can browse the live instances of QANX smart contracts below:
 
-- ETH (ERC20): [0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa](https://etherscan.io/token/0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa) [ Ethereum ]
-- BSC (BEP20): [0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa](https://bscscan.com/token/0xAAA7A10a8ee237ea61E8AC46C50A8Db8bCC1baaa) [ Binance Smart Chain ]
+- ETH (ERC20): [TBA](#) [ Ethereum ]
+- BSC (BEP20): [TBA](#) [ Binance Smart Chain ]
 
 ---
 
+## Structure
+
+The QANX smart contract is built on top of the industry standard OpenZeppelin smart contracts.
+
+### OpenZeppelin contract modifications
+
+The OpenZeppelin contracts are not imported directly, because they are slightly modified. Anyone can compare against the orignal version, the base version used is release [v4.8.1](https://github.com/OpenZeppelin/openzeppelin-contracts/tree/v4.8.1/contracts/token/ERC20).
+The following modifications were done to the base contracts to optimize gas fees and enable extended functionality:
+
+- Lock floating Solidity pragma to version 0.8.17 
+- Update import paths according to project layout
+- Modify function visibilities from public to external to optimize gas
+- Modifiy ```_balances``` and ```_allowances``` mapping visibility to internal
+
+## Previous audits:
 ## Audit by CertiK <img align="right" src="./audit/certik-badge.png">
 
 We are proud that QANX smart contract passed CertiK's audit excellently. You can find the audit report [here](./audit/REP-QANX-2021-05-28.pdf).
@@ -36,4 +53,12 @@ Other than QANX the audit firm Hacken was also assigned to audit the recognizabl
 
 If you are still curious about how QANX works and want to verify yourself (awesome, you always should!), you can compile and test it easily with Docker. Just run the following command:
 
-```docker build -t qanx . && docker run --rm qanx```
+```docker build -t qanx . && docker run --rm -v $PWD/out:/out qanx```
+
+This will compile the contract, put the built artifacts into the ```out``` directory in your current path then run all unit tests.
+
+If you want to inspect the test coverage report, append "coverage" to the docker run command like this:
+
+```
+docker run --rm -v $PWD/out:/out qanx coverage
+```
