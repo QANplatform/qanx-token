@@ -1,558 +1,376 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
-/**
- * @dev Interface of the ERC20 standard as defined in the EIP.
- */
-interface IERC20 {
-    /**
-     * @dev Returns the amount of tokens in existence.
-     */
-    function totalSupply() external view returns (uint256);
-
-    /**
-     * @dev Returns the amount of tokens owned by `account`.
-     */
-    function balanceOf(address account) external view returns (uint256);
-
-    /**
-     * @dev Moves `amount` tokens from the caller's account to `recipient`.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * Emits a {Transfer} event.
-     */
-    function transfer(address recipient, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Returns the remaining number of tokens that `spender` will be
-     * allowed to spend on behalf of `owner` through {transferFrom}. This is
-     * zero by default.
-     *
-     * This value changes when {approve} or {transferFrom} are called.
-     */
-    function allowance(address owner, address spender) external view returns (uint256);
-
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * IMPORTANT: Beware that changing an allowance with this method brings the risk
-     * that someone may use both the old and the new allowance by unfortunate
-     * transaction ordering. One possible solution to mitigate this race
-     * condition is to first reduce the spender's allowance to 0 and set the
-     * desired value afterwards:
-     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-     *
-     * Emits an {Approval} event.
-     */
-    function approve(address spender, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Moves `amount` tokens from `sender` to `recipient` using the
-     * allowance mechanism. `amount` is then deducted from the caller's
-     * allowance.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * Emits a {Transfer} event.
-     */
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Emitted when `value` tokens are moved from one account (`from`) to
-     * another (`to`).
-     *
-     * Note that `value` may be zero.
-     */
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    /**
-     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
-     * a call to {approve}. `value` is the new allowance.
-     */
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
-
-/*
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view virtual returns (bytes calldata) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
-}
-
-
-
-/**
- * @dev Implementation of the {IERC20} interface.
- *
- * This implementation is agnostic to the way tokens are created. This means
- * that a supply mechanism has to be added in a derived contract using {_mint}.
- * For a generic mechanism see {ERC20PresetMinterPauser}.
- *
- * TIP: For a detailed writeup see our guide
- * https://forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How
- * to implement supply mechanisms].
- *
- * We have followed general OpenZeppelin guidelines: functions revert instead
- * of returning `false` on failure. This behavior is nonetheless conventional
- * and does not conflict with the expectations of ERC20 applications.
- *
- * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
- * This allows applications to reconstruct the allowance for all accounts just
- * by listening to said events. Other implementations of the EIP may not emit
- * these events, as it isn't required by the specification.
- *
- * Finally, the non-standard {decreaseAllowance} and {increaseAllowance}
- * functions have been added to mitigate the well-known issues around setting
- * allowances. See {IERC20-approve}.
- */
-contract ERC20 is Context, IERC20 {
-    mapping (address => uint256) internal _balances;
-
-    mapping (address => mapping (address => uint256)) private _allowances;
-
-    uint256 private _totalSupply;
-
-    string private _name;
-    string private _symbol;
-
-    /**
-     * @dev Sets the values for {name} and {symbol}.
-     *
-     * The defaut value of {decimals} is 18. To select a different value for
-     * {decimals} you should overload it.
-     *
-     * All three of these values are immutable: they can only be set once during
-     * construction.
-     */
-    constructor (string memory name_, string memory symbol_) {
-        _name = name_;
-        _symbol = symbol_;
-    }
-
-    /**
-     * @dev Returns the name of the token.
-     */
-    function name() external view virtual returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
-    function symbol() external view virtual returns (string memory) {
-        return _symbol;
-    }
-
-    /**
-     * @dev Returns the number of decimals used to get its user representation.
-     * For example, if `decimals` equals `2`, a balance of `505` tokens should
-     * be displayed to a user as `5,05` (`505 / 10 ** 2`).
-     *
-     * Tokens usually opt for a value of 18, imitating the relationship between
-     * Ether and Wei. This is the value {ERC20} uses, unless this function is
-     * overloaded;
-     *
-     * NOTE: This information is only used for _display_ purposes: it in
-     * no way affects any of the arithmetic of the contract, including
-     * {IERC20-balanceOf} and {IERC20-transfer}.
-     */
-    function decimals() external view virtual returns (uint8) {
-        return 18;
-    }
-
-    /**
-     * @dev See {IERC20-totalSupply}.
-     */
-    function totalSupply() external view virtual override returns (uint256) {
-        return _totalSupply;
-    }
-
-    /**
-     * @dev See {IERC20-balanceOf}.
-     */
-    function balanceOf(address account) external view virtual override returns (uint256) {
-        return _balances[account];
-    }
-
-    /**
-     * @dev See {IERC20-transfer}.
-     *
-     * Requirements:
-     *
-     * - `recipient` cannot be the zero address.
-     * - the caller must have a balance of at least `amount`.
-     */
-    function transfer(address recipient, uint256 amount) external virtual override returns (bool) {
-        _transfer(_msgSender(), recipient, amount);
-        return true;
-    }
-
-    /**
-     * @dev See {IERC20-allowance}.
-     */
-    function allowance(address owner, address spender) external view virtual override returns (uint256) {
-        return _allowances[owner][spender];
-    }
-
-    /**
-     * @dev See {IERC20-approve}.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     */
-    function approve(address spender, uint256 amount) external virtual override returns (bool) {
-        _approve(_msgSender(), spender, amount);
-        return true;
-    }
-
-    /**
-     * @dev See {IERC20-transferFrom}.
-     *
-     * Emits an {Approval} event indicating the updated allowance. This is not
-     * required by the EIP. See the note at the beginning of {ERC20}.
-     *
-     * Requirements:
-     *
-     * - `sender` and `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     * - the caller must have allowance for ``sender``'s tokens of at least
-     * `amount`.
-     */
-    function transferFrom(address sender, address recipient, uint256 amount) external virtual override returns (bool) {
-        _transfer(sender, recipient, amount);
-
-        uint256 currentAllowance = _allowances[sender][_msgSender()];
-        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
-        _approve(sender, _msgSender(), currentAllowance - amount);
-
-        return true;
-    }
-
-    /**
-     * @dev Atomically increases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     */
-    function increaseAllowance(address spender, uint256 addedValue) external virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender] + addedValue);
-        return true;
-    }
-
-    /**
-     * @dev Atomically decreases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     * - `spender` must have allowance for the caller of at least
-     * `subtractedValue`.
-     */
-    function decreaseAllowance(address spender, uint256 subtractedValue) external virtual returns (bool) {
-        uint256 currentAllowance = _allowances[_msgSender()][spender];
-        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
-        _approve(_msgSender(), spender, currentAllowance - subtractedValue);
-
-        return true;
-    }
-
-    /**
-     * @dev Moves tokens `amount` from `sender` to `recipient`.
-     *
-     * This is internal function is equivalent to {transfer}, and can be used to
-     * e.g. implement automatic token fees, slashing mechanisms, etc.
-     *
-     * Emits a {Transfer} event.
-     *
-     * Requirements:
-     *
-     * - `sender` cannot be the zero address.
-     * - `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
-     */
-    function _transfer(address sender, address recipient, uint256 amount) internal virtual {
-        require(sender != address(0), "ERC20: transfer from the zero address");
-        require(recipient != address(0), "ERC20: transfer to the zero address");
-
-        _beforeTokenTransfer(sender, recipient, amount);
-
-        uint256 senderBalance = _balances[sender];
-        require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
-        _balances[sender] = senderBalance - amount;
-        _balances[recipient] += amount;
-
-        emit Transfer(sender, recipient, amount);
-    }
-
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
-     *
-     * Emits a {Transfer} event with `from` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     */
-    function _mint(address account, uint256 amount) internal virtual {
-        require(account != address(0), "ERC20: mint to the zero address");
-
-        _beforeTokenTransfer(address(0), account, amount);
-
-        _totalSupply += amount;
-        _balances[account] += amount;
-        emit Transfer(address(0), account, amount);
-    }
-
-    /**
-     * @dev Destroys `amount` tokens from `account`, reducing the
-     * total supply.
-     *
-     * Emits a {Transfer} event with `to` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     * - `account` must have at least `amount` tokens.
-     */
-    function _burn(address account, uint256 amount) internal virtual {
-        require(account != address(0), "ERC20: burn from the zero address");
-
-        _beforeTokenTransfer(account, address(0), amount);
-
-        uint256 accountBalance = _balances[account];
-        require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
-        _balances[account] = accountBalance - amount;
-        _totalSupply -= amount;
-
-        emit Transfer(account, address(0), amount);
-    }
-
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the `owner` s tokens.
-     *
-     * This internal function is equivalent to `approve`, and can be used to
-     * e.g. set automatic allowances for certain subsystems, etc.
-     *
-     * Emits an {Approval} event.
-     *
-     * Requirements:
-     *
-     * - `owner` cannot be the zero address.
-     * - `spender` cannot be the zero address.
-     */
-    function _approve(address owner, address spender, uint256 amount) internal virtual {
-        require(owner != address(0), "ERC20: approve from the zero address");
-        require(spender != address(0), "ERC20: approve to the zero address");
-
-        _allowances[owner][spender] = amount;
-        emit Approval(owner, spender, amount);
-    }
-
-    /**
-     * @dev Hook that is called before any transfer of tokens. This includes
-     * minting and burning.
-     *
-     * Calling conditions:
-     *
-     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * will be to transferred to `to`.
-     * - when `from` is zero, `amount` tokens will be minted for `to`.
-     * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
-}
-
+import "./ERC20.sol";
 ///////////////////////////////////////////////
 // QANX STARTS HERE, OPENZEPPELIN CODE ABOVE //
 ///////////////////////////////////////////////
 
 contract QANX is ERC20 {
 
-    // EVENTS TO BE EMITTED UPON LOCKS ARE APPLIED & REMOVED
-    event LockApplied(address indexed account, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops);
+    /// @notice Represents a lock which might be applied on an address
+    /// @dev Lock logic is described in the _applyLock() method
+    struct Lock {
+        uint256 tokenAmount;    /// How many tokens are locked
+        uint256 unlockPerSec;   /// How many tokens are unlockable each sec from hl -> sl
+        uint64 hardLockUntil;   /// Until when no locked tokens can be accessed
+        uint64 softLockUntil;   /// Until when locked tokens can be gradually released
+        uint64 lastUnlock;      /// Last gradual unlock time (softlock period)
+        uint64 allowedHops;     /// How many transfers left with same lock params
+    }
+
+    /// @notice Cheque signer address
+    /// @dev This is compared against a recovered secp256k1 signature
+    address private chequeSigner;
+
+    /// @notice This maps used cheques so they can not be encashed twice
+    /// @dev Ensures that every unique cheque paramset can be encashed once
+    mapping (bytes32 => bool) private chequesEncashed;
+
+    /// @notice This maps lock params to certain addresses which received locked tokens
+    /// @dev Lookup table for locks assigned to specific addresses
+    mapping (address => Lock) private _locks;    
+
+    /// @notice Emitted when a lock is applied on an account
+    /// @dev The first param is indexed which makes it easy to listen to locks applied to a specific account
+    event LockApplied(address indexed account, uint256 amount, uint64 hardLockUntil, uint64 softLockUntil, uint64 allowedHops);
+
+    /// @notice Emitted when a lock is removed from an account
+    /// @dev The account param is indexed which makes it easy to listen to locks getting removed from a specific account
     event LockRemoved(address indexed account);
 
-    // INITIALIZE AN ERC20 TOKEN BASED ON THE OPENZEPPELIN VERSION
+    /// @notice Emitted when a lock amount is decreased on an account
+    /// @dev The first param is indexed which makes it easy to listen to locked amount getting decreased on a specific account
+    event LockDecreased(address indexed account, uint256 amount);
+
+    /// @notice Initialize an erc20 token based on the openzeppelin version
+    /// @dev Sets the initial cheque signer to the deployer address and mints total supply to the contract itself
     constructor() ERC20("QANX Token", "QANX") {
 
-        // INITIALLY MINT TOTAL SUPPLY TO CREATOR
-        _mint(_msgSender(), 3333333000 * (10 ** 18));
+        // Assign deployer as cheque signer initially
+        chequeSigner = msg.sender;
+
+        // Initially mint total supply to contract itself
+        _mint(address(this), 3_333_333_000 * 1e18);
     }
 
-    // MAPPING FOR QUANTUM PUBLIC KEY HASHES
-    mapping (address => bytes32) private _qPubKeyHashes;
-
-    // REGISTER QUANTUM PUBLIC KEY HASH OF THE CURRENT ACCOUNT
-    function setQuantumPubkeyHash(bytes32 qPubKeyHash) external {
-        _qPubKeyHashes[_msgSender()] = qPubKeyHash;
+    /// @notice Refuse any kind of payment to the contract
+    /// @dev This is the implicit default behavior, it just exists for verbosity
+    receive() external payable {
+        revert();
     }
 
-    // QUERY A QUANTUM PUBLIC KEY HASH OF A GIVEN ACCOUNT
-    function getQuantumPubkeyHash(address account) external view virtual returns (bytes32) {
-        return _qPubKeyHashes[account];
+    /// @notice Refuse any kind of payment to the contract
+    /// @dev This is the implicit default behavior, it just exists for verbosity
+    fallback() external payable {
+        revert();
     }
 
-    // REPRESENTS A LOCK WHICH MIGHT BE APPLIED ON AN ADDRESS
-    struct Lock {
-        uint256 tokenAmount;    // HOW MANY TOKENS ARE LOCKED
-        uint32 hardLockUntil;   // UNTIL WHEN NO LOCKED TOKENS CAN BE ACCESSED
-        uint32 softLockUntil;   // UNTIL WHEN LOCKED TOKENS CAN BE GRADUALLY RELEASED
-        uint8 allowedHops;      // HOW MANY TRANSFERS LEFT WITH SAME LOCK PARAMS
-        uint32 lastUnlock;      // LAST GRADUAL UNLOCK TIME (SOFTLOCK PERIOD)
-        uint256 unlockPerSec;   // HOW MANY TOKENS ARE UNLOCKABLE EACH SEC FROM HL -> SL
+    /// @notice Ability to update cheque signer
+    /// @dev Make sure to externally double check the new cheque signer address!
+    /// @param _newChequeSigner The address which new cheque signatures will be compared against from now
+    function setChequeSigner(address _newChequeSigner) external {
+        require(msg.sender == chequeSigner && _newChequeSigner != address(0), "Invalid cheque signer");
+        chequeSigner = _newChequeSigner;
     }
 
-    // THIS MAPS LOCK PARAMS TO CERTAIN ADDRESSES WHICH RECEIVED LOCKED TOKENS
-    mapping (address => Lock) private _locks;
+    /// @notice Method to encash a received cheque
+    /// @dev Ability to encash offline signed cheques using on-chain signature verification.
+    /// Please note that cheques are expected to be one cheque per address, so using CID as
+    /// a nonce is intentional and works as designed.
+    /// @param beneficiary The address which will receive the tokens
+    /// @param amount The amount of tokens the beneficiary will receive
+    /// @param hardLockUntil The UNIX timestamp until which the tokens are not transferable
+    /// @param softLockUntil The UNIX timestamp until which the tokens are gradually unlockable
+    /// @param allowedHops How many times the locked tokens can be transferred further
+    /// @param signature The secp256k1 signature of CID as per EIP-2098 (r + _vs)
+    function encashCheque(address beneficiary, uint256 amount, uint64 hardLockUntil, uint64 softLockUntil, uint64 allowedHops, bytes32[2] calldata signature) external {
 
-    // RETURNS LOCK INFORMATION OF A GIVEN ADDRESS
-    function lockOf(address account) external view virtual returns (Lock memory) {
-        return _locks[account];
-    }
+        // Calculate cheque id
+        bytes32 cid = keccak256(abi.encode(block.chainid, address(this), beneficiary, amount, hardLockUntil, softLockUntil, allowedHops));
 
-    // RETURN THE BALANCE OF UNLOCKED AND LOCKED TOKENS COMBINED
-    function balanceOf(address account) external view virtual override returns (uint256) {
-        return _balances[account] + _locks[account].tokenAmount;
-    }
+        // Verify cheque signature
+        require(verifyChequeSignature(cid, signature), "Cheque signature is invalid!");
 
-    // TRANSFER FUNCTION WITH LOCK PARAMETERS
-    function transferLocked(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) external returns (bool) {
+        // Make sure this cheque was not encashed before
+        require(!chequesEncashed[cid], "This cheque was encashed already!");
 
-        // ONLY ONE LOCKED TRANSACTION ALLOWED PER RECIPIENT
-        require(_locks[recipient].tokenAmount == 0, "Only one lock per address allowed!");
+        // Mark cheque as encashed
+        chequesEncashed[cid] = true;
+        
+        // If any lock related params were defined as non-zero
+        if (hardLockUntil > 0) {
 
-        // SENDER MUST HAVE ENOUGH TOKENS (UNLOCKED + LOCKED BALANCE COMBINED)
-        require(_balances[_msgSender()] + _locks[_msgSender()].tokenAmount >= amount, "Transfer amount exceeds balance");
-
-        // IF SENDER HAS ENOUGH UNLOCKED BALANCE, THEN LOCK PARAMS CAN BE CHOSEN
-        if(_balances[_msgSender()] >= amount){
-
-            // DEDUCT SENDER BALANCE
-            _balances[_msgSender()] = _balances[_msgSender()] - amount;
-
-            // APPLY LOCK
-            return _applyLock(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+            // Encash through a locked transfer
+            _transferLocked(address(this), beneficiary, amount, hardLockUntil, softLockUntil, allowedHops);
+            return;
         }
 
-        // OTHERWISE REQUIRE THAT THE CHOSEN LOCK PARAMS ARE SAME / STRICTER (allowedHops) THAN THE SENDER'S
-        require(
-            hardLockUntil >= _locks[_msgSender()].hardLockUntil && 
-            softLockUntil >= _locks[_msgSender()].softLockUntil && 
-            allowedHops < _locks[_msgSender()].allowedHops
-        );
-
-        // IF SENDER HAS ENOUGH LOCKED BALANCE
-        if(_locks[_msgSender()].tokenAmount >= amount){
-
-            // DECREASE LOCKED BALANCE OF SENDER
-            _locks[_msgSender()].tokenAmount = _locks[_msgSender()].tokenAmount - amount;
-
-            // APPLY LOCK
-            return _applyLock(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
-        }
-
-        // IF NO CONDITIONS WERE MET SO FAR, DEDUCT FROM THE UNLOCKED BALANCE
-        _balances[_msgSender()] = _balances[_msgSender()] - (amount - _locks[_msgSender()].tokenAmount);
-
-        // THEN SPEND LOCKED BALANCE OF SENDER FIRST
-        _locks[_msgSender()].tokenAmount = 0;
-
-        // APPLY LOCK
-        return _applyLock(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+        // Otherwise encash using a normal transfer
+        _transfer(address(this), beneficiary, amount);
     }
 
-    // APPLIES LOCK TO RECIPIENT WITH SPECIFIED PARAMS AND EMITS A TRANSFER EVENT
-    function _applyLock(address recipient, uint256 amount, uint32 hardLockUntil, uint32 softLockUntil, uint8 allowedHops) private returns (bool) {
-
-        // MAKE SURE THAT SOFTLOCK IS AFTER HARDLOCK
-        require(softLockUntil > hardLockUntil, "SoftLock must be greater than HardLock!");
-
-        // APPLY LOCK, EMIT TRANSFER EVENT
-        _locks[recipient] = Lock(amount, hardLockUntil, softLockUntil, allowedHops, hardLockUntil, amount / (softLockUntil - hardLockUntil));
-        emit LockApplied(recipient, amount, hardLockUntil, softLockUntil, allowedHops);
-        emit Transfer(_msgSender(), recipient, amount);
+    /// @notice Transfer function with lock parameters
+    /// @dev Wraps the _transferLocked internal method
+    /// @param recipient The address whose locked balance will be credited
+    /// @param amount The amount which will be credited to the recipient address
+    /// @param hardLockUntil The UNIX timestamp until which the tokens are not transferable
+    /// @param softLockUntil The UNIX timestamp until which the tokens are gradually unlockable
+    /// @param allowedHops How many times the locked tokens can be transferred further
+    /// @return Success
+    function transferLocked(address recipient, uint256 amount, uint64 hardLockUntil, uint64 softLockUntil, uint64 allowedHops) external returns (bool) {
+        _transferLocked(_msgSender(), recipient, amount, hardLockUntil, softLockUntil, allowedHops);
         return true;
     }
 
-    function lockedBalanceOf(address account) external view virtual returns (uint256) {
-        return _locks[account].tokenAmount;
-    }
+    /// @notice Transferfrom function with lock parameters
+    /// @dev Wraps the _transferLocked internal method
+    /// @param sender The address whose balance will be debited
+    /// @param recipient The address whose locked balance will be credited
+    /// @param amount The amount which will be credited to the recipient address
+    /// @param hardLockUntil The UNIX timestamp until which the tokens are not transferable
+    /// @param softLockUntil The UNIX timestamp until which the tokens are gradually unlockable
+    /// @param allowedHops How many times the locked tokens can be transferred further
+    /// @return Success
+    function transferFromLocked(address sender, address recipient, uint256 amount, uint64 hardLockUntil, uint64 softLockUntil, uint64 allowedHops) external returns (bool) {
 
-    function unlockedBalanceOf(address account) external view virtual returns (uint256) {
-        return _balances[account];
-    }
+        // Query current allowance of spender
+        uint256 currentAllowance = _allowances[sender][_msgSender()];
 
-    function unlockableBalanceOf(address account) public view virtual returns (uint256) {
+        // If the allowance is not unlimited
+        if (currentAllowance != type(uint256).max) {
 
-        // IF THE HARDLOCK HAS NOT PASSED YET, THERE ARE NO UNLOCKABLE TOKENS
-        if(block.timestamp < _locks[account].hardLockUntil) {
-            return 0;
+            // Ensure sufficient allowance and decrease it by current amount
+            require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+            unchecked {
+                _approve(sender, _msgSender(), currentAllowance - amount);
+            }
         }
 
-        // IF THE SOFTLOCK PERIOD PASSED, ALL CURRENTLY TOKENS ARE UNLOCKABLE
-        if(block.timestamp > _locks[account].softLockUntil) {
-            return _locks[account].tokenAmount;
-        }
-
-        // OTHERWISE THE PROPORTIONAL AMOUNT IS UNLOCKABLE
-        return (block.timestamp - _locks[account].lastUnlock) * _locks[account].unlockPerSec;
+        // Perform locked transfer
+        _transferLocked(sender, recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+        return true;
     }
 
+    /// @notice Unlocks all unlockable tokens of a particular account
+    /// @dev Calculates the unlockable amount based on the private _locks mapping
+    /// @param account The address whose tokens should be unlocked
+    /// @return Success
     function unlock(address account) external returns (bool) {
 
-        // CALCULATE UNLOCKABLE BALANCE
+        // Lookup lock
+        Lock storage lock = _locks[account];
+
+        // Calculate unlockable balance
         uint256 unlockable = unlockableBalanceOf(account);
 
-        // ONLY ADDRESSES OWNING LOCKED TOKENS AND BYPASSED HARDLOCK TIME ARE UNLOCKABLE
-        require(unlockable > 0 && _locks[account].tokenAmount > 0 && block.timestamp > _locks[account].hardLockUntil, "No unlockable tokens!");
+        // Only addresses owning locked tokens and bypassed hardlock time are unlockable
+        require(unlockable > 0 && lock.tokenAmount > 0, "No unlockable tokens!");
 
-        // SET LAST UNLOCK TIME, DEDUCT FROM LOCKED BALANCE & CREDIT TO REGULAR BALANCE
-        _locks[account].lastUnlock = uint32(block.timestamp);
-        _locks[account].tokenAmount = _locks[account].tokenAmount - unlockable;
-        _balances[account] = _balances[account] + unlockable;
+        // Set last unlock time, deduct from locked balance & credit to regular balance
+        lock.lastUnlock = uint64(block.timestamp);
+        lock.tokenAmount = lock.tokenAmount - unlockable;
+        _balances[account] += unlockable;
 
-        // IF NO MORE LOCKED TOKENS LEFT, REMOVE LOCK OBJECT FROM ADDRESS
-        if(_locks[account].tokenAmount == 0){
+        // If no more locked tokens left, remove lock object from address
+        if(lock.tokenAmount == 0){
             delete _locks[account];
             emit LockRemoved(account);
         }
 
-        // UNLOCK SUCCESSFUL
-        emit Transfer(account, account, unlockable);
+        // Unlock successful
+        emit LockDecreased(account, unlockable);
         return true;
+    }
+
+    /// @notice Returns the locked token balance of a particular account
+    /// @dev Reads the private _locks mapping to return data
+    /// @param account The address whose locked balance should be read
+    /// @return The number of locked tokens owned by the account
+    function lockedBalanceOf(address account) external view returns (uint256) {
+        return _locks[account].tokenAmount;
+    }
+
+    /// @notice Returns the unlocked token balance of a particular account
+    /// @dev Reads the internal _balances mapping to return data
+    /// @param account The address whose unlocked balance should be read
+    /// @return The number of unlocked tokens owned by the account
+    function unlockedBalanceOf(address account) external view returns (uint256) {
+        return _balances[account];
+    }
+
+    /// @notice Returns lock information of a given address
+    /// @dev Reads a whole entry of the private _locks mapping to return data
+    /// @param account The address whose lock object should be read
+    /// @return The lock object of the particular account
+    function lockOf(address account) external view returns (Lock memory) {
+        return _locks[account];
+    }
+
+    /// @notice Return the balance of unlocked and locked tokens combined
+    /// @dev This overrides the OZ version for combined output
+    /// @param account The address whose total balance is looked up
+    /// @return The combined (unlocked + locked) balance of the particular account
+    function balanceOf(address account) external view override returns (uint256) {
+        return _balances[account] + _locks[account].tokenAmount;
+    }
+
+    /// @notice Calculates the number of unlockable tokens of a particular account
+    /// @dev Dynamically calculates unlockable balance based on current block timestamp
+    /// @param account The address whose unlockable balance is calculated
+    /// @return The amount of tokens which can be unlocked at the current block timestamp
+    function unlockableBalanceOf(address account) public view returns (uint256) {
+
+        // Lookup lock
+        Lock memory lock = _locks[account];
+
+        // If the hardlock has not passed yet, there are no unlockable tokens
+        if(block.timestamp < lock.hardLockUntil) {
+            return 0;
+        }
+
+        // If the softlock period passed, all currently tokens are unlockable
+        if(block.timestamp > lock.softLockUntil) {
+            return lock.tokenAmount;
+        }
+
+        // Otherwise the proportional amount is unlockable
+        return (block.timestamp - lock.lastUnlock) * lock.unlockPerSec;
+    }
+
+    /// @dev Abstract method to execute locked transfers
+    /// @param sender The address whose balance will be debited
+    /// @param recipient The address whose locked balance will be credited
+    /// @param amount The amount which will be credited to the recipient address
+    /// @param hardLockUntil The UNIX timestamp until which the tokens are not transferable
+    /// @param softLockUntil The UNIX timestamp until which the tokens are gradually unlockable
+    /// @param allowedHops How many times the locked tokens can be transferred further
+    /// @return Success
+    function _transferLocked(address sender, address recipient, uint256 amount, uint64 hardLockUntil, uint64 softLockUntil, uint64 allowedHops) internal returns (bool) {
+
+        // Perform zero address validation
+        require(recipient != address(0), "ERC20: transfer to the zero address");
+
+        // Lookup sender balance
+        uint256 sBalance = _balances[sender];
+
+        // Lookup lock of sender and recipient
+        Lock storage rLock = _locks[recipient];
+        Lock storage sLock = _locks[sender];
+
+        // Only a single set of lock parameters allowed per recipient
+        if (rLock.tokenAmount > 0){
+            require(
+                hardLockUntil == rLock.hardLockUntil &&
+                softLockUntil == rLock.softLockUntil &&
+                allowedHops == rLock.allowedHops
+            , "Only one lock params per address allowed!");
+        }
+
+        // Sender must have enough tokens (unlocked + locked balance combined)
+        require(sBalance + sLock.tokenAmount >= amount, "Transfer amount exceeds balance");
+
+        // If sender has enough unlocked balance, then lock params can be chosen
+        if(sBalance >= amount){
+
+            // Deduct sender balance
+            unchecked {
+                _balances[sender] = sBalance - amount;
+            }
+
+            // Apply lock
+            return _applyLock(sender, recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+        }
+
+        // Otherwise require that the chosen lock params are same / stricter (allowedhops) than the sender's
+        require(
+            hardLockUntil >= sLock.hardLockUntil && 
+            softLockUntil >= sLock.softLockUntil && 
+            allowedHops < sLock.allowedHops
+            , "Only same / stricter lock params allowed!"
+        );
+
+        // If sender has enough locked balance
+        if(sLock.tokenAmount >= amount){
+
+            // Decrease locked balance of sender
+            unchecked {
+                sLock.tokenAmount = sLock.tokenAmount - amount;
+            }
+
+            // Apply lock
+            return _applyLock(sender, recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+        }
+
+        // If no conditions were met so far, deduct from the unlocked balance
+        unchecked {
+            _balances[sender] = sBalance - (amount - sLock.tokenAmount);
+        }
+
+        // Then spend locked balance of sender first
+        sLock.tokenAmount = 0;
+
+        // Apply lock
+        return _applyLock(sender, recipient, amount, hardLockUntil, softLockUntil, allowedHops);
+    }
+
+    /// @notice Applies lock to recipient with specified params and emits a transfer event
+    /// @param sender The address whose balance will be debited
+    /// @param recipient The address whose locked balance will be credited
+    /// @param amount The amount which will be credited to the recipient address
+    /// @param hardLockUntil The UNIX timestamp until which the tokens are not transferable
+    /// @param softLockUntil The UNIX timestamp until which the tokens are gradually unlockable
+    /// @param allowedHops How many times the locked tokens can be transferred further
+    /// @return Success
+    function _applyLock(address sender, address recipient, uint256 amount, uint64 hardLockUntil, uint64 softLockUntil, uint64 allowedHops) private returns (bool) {
+
+        // Make sure that softlock is not before hardlock
+        require(softLockUntil >= hardLockUntil, "SoftLock must be >= HardLock!");
+
+        // Make sure that hardlock is in the future
+        require(hardLockUntil >= block.timestamp, "HardLock must be in the future!");
+
+        // Make sure that the amount is increased if a lock already exists
+        uint256 totalAmount;
+        uint256 lockSeconds;
+        uint256 unlockPerSec;
+        unchecked {
+            totalAmount = _locks[recipient].tokenAmount + amount;
+            lockSeconds = softLockUntil - hardLockUntil;
+            unlockPerSec = lockSeconds > 0 ? totalAmount / lockSeconds : 0;
+        }
+
+        // Apply lock, emit transfer event
+        _locks[recipient] = Lock({
+            tokenAmount: totalAmount,
+            unlockPerSec: unlockPerSec,
+            hardLockUntil: hardLockUntil,
+            softLockUntil: softLockUntil,
+            lastUnlock: hardLockUntil,
+            allowedHops: allowedHops
+        });
+        emit LockApplied(recipient, totalAmount, hardLockUntil, softLockUntil, allowedHops);
+        emit Transfer(sender, recipient, amount);
+        return true;
+    }
+
+    /// @notice Method to verify cheque signature
+    /// @dev This verifies a compact secp256k1 signature as per EIP-2098
+    /// @param cid The Cheque ID which is calculated deterministically based on cheque params
+    /// @param signature The EIP-2098 signature which was created offline by the permitted chequeSigner
+    /// @return Whether the recovered signer address matches the permitted chequeSigner
+    function verifyChequeSignature(bytes32 cid, bytes32[2] memory signature) private view returns (bool) {
+
+        // Determine s and v from vs (signature[1])
+        bytes32 s = signature[1] & bytes32(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+        uint8 v = uint8((uint256(signature[1]) >> 255) + 27);
+
+        // Ensure valid range for s in (301): 0 < s < secp256k1n ÷ 2 + 1
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return false;
+        }
+
+        // Recover & verify signer identity related to amount
+        return ecrecover(cid, v, signature[0], s) == chequeSigner;
     }
 }
