@@ -323,7 +323,7 @@ describe("QANX", function () {
             // DEFINE LOCK PARAMS
             const lock = {
                 tokenAmount: ethers.utils.parseUnits('1000'),
-                hardLockUntil: timestamp(-1),
+                hardLockUntil: timestamp(-10),
                 softLockUntil: timestamp(+30),
                 allowedHops: 0
             };
