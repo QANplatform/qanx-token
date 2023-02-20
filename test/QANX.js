@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const privkeys = require('../utils/acc-keys');
@@ -43,7 +43,7 @@ describe("QANX", function () {
             tokenAmount: ethers.utils.parseUnits('100000'),
             hardLockUntil: timestamp(+15),
             softLockUntil: timestamp(+30),
-            allowedHops: 0
+            allowedHops: 2
         };
 
         await qanx.transferLocked(
@@ -739,6 +739,17 @@ describe("QANX", function () {
     });
 
     describe("Token unlocks", function () {
+
+        it('should not fail when unlocking tokens after transferring locked balance', async function () {
+            const { qanx, recipient, lock } = await loadFixture(lockFixture);
+            const [target] = await ethers.getSigners();
+            await qanx.connect(recipient).transferLocked(target.address, lock.tokenAmount.div(2), lock.hardLockUntil, lock.softLockUntil, lock.allowedHops - 1);
+            await time.increaseTo(lock.softLockUntil - 1);
+            const unlockTx = await qanx.unlock(recipient.address);
+            await expect(unlockTx).not.revertedWithPanic();
+         });
+
+
         it('should not be able to call unlock() before hardlocktime', async () => {
 
             const { qanx, recipient, lock } = await loadFixture(lockFixture);

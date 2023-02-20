@@ -235,7 +235,8 @@ contract QANX is ERC20 {
         }
 
         // Otherwise the proportional amount is unlockable
-        return (block.timestamp - lock.lastUnlock) * lock.unlockPerSec;
+        uint256 unlockable = (block.timestamp - lock.lastUnlock) * lock.unlockPerSec;
+        return lock.tokenAmount < unlockable ? lock.tokenAmount : unlockable;
     }
 
     /// @dev Abstract method to execute locked transfers
