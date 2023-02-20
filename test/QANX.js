@@ -118,6 +118,16 @@ describe("QANX", function () {
             )).to.be.revertedWith('Cheque signature is invalid!');
         });
 
+        it('should emit an event with new cheque signer address at delegation', async function () {
+            const { qanx, chequeSignerInitial, chequeSigner } = await loadFixture(deployFixture);
+            const amount = ethers.utils.parseUnits('1000');
+            await expect(qanx.setChequeSigner(chequeSigner.address, {
+                from: chequeSignerInitial.address
+            })).to.emit(qanx, "ChequeSignerUpdated").withArgs(
+                chequeSigner.address
+            );
+        });
+
         it('should not let previous cheque signer delegate', async function () {
 
             const { qanx, chequeSignerInitial, chequeSigner } = await loadFixture(deployFixture);

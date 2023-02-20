@@ -43,6 +43,10 @@ contract QANX is ERC20 {
     /// @dev The first param is indexed which makes it easy to listen to locked amount getting decreased on a specific account
     event LockDecreased(address indexed account, uint256 amount);
 
+    /// @notice Emitted when a the permitted cheque signer address is changed
+    /// @dev This will be new address the ecrecover result is compared against
+    event ChequeSignerUpdated(address signer);
+
     /// @notice Initialize an erc20 token based on the openzeppelin version
     /// @dev Sets the initial cheque signer to the deployer address and mints total supply to the contract itself
     constructor() ERC20("QANX Token", "QANX") {
@@ -72,6 +76,7 @@ contract QANX is ERC20 {
     function setChequeSigner(address _newChequeSigner) external {
         require(msg.sender == chequeSigner && _newChequeSigner != address(0), "Invalid cheque signer");
         chequeSigner = _newChequeSigner;
+        emit ChequeSignerUpdated(chequeSigner);
     }
 
     /// @notice Method to encash a received cheque
