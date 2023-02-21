@@ -29,8 +29,30 @@ The following modifications were done to the base contracts to optimize gas fees
 - Modify function visibilities from public to external to optimize gas
 - Modifiy ```_balances``` and ```_allowances``` mapping visibility to internal
 
+## Audits 2023:
+
+### Audit by Omniscia <img align="right" src="./audit/omniscia-badge.png">
+
+We are proud that the most recent QANX smart contract also passed Omniscia's audit excellently. You can find the latest audit report [here](https://omniscia.io/reports/qanx-token-round-2-63f2293c95190c0014d649c7/).
+
+Omniscia is a leading Web3 security firm with deep experience securing and optimizing complex smart contracts and blockchain networks.
+
+Other than QANX the audit firm Omniscia was also assigned to audit: Polygon and Ava Labs just to name a few.
+
+---
+
+### Audit by Hacken <img align="right" src="./audit/hacken2-badge.png">
+
+We are proud that the most recent QANX smart contract also passed Hacken's audit excellently with a score of 10/10. You can find the latest audit report [here](./audit/Hacken-QANplatform-20022023.pdf).
+
+Hacken is a leading cybersecurity consulting company with an essential focus on blockchain security. Hacken Cybersecurity Services is a part of Hacken Group, including CER.live, HackenAI, Trust Army, Hextractor, and HackenProof. From June 2020, CER.live is the unique cybersecurity data provider for CoinGecko Trust Score.
+
+Other than QANX the audit firm Hacken was also assigned to audit the recognizable Gate.io, Bithumb Global, and 1inch just to name a few.
+
+---
+
 ## Previous audits:
-## Audit by CertiK <img align="right" src="./audit/certik-badge.png">
+### Audit by CertiK <img align="right" src="./audit/certik-badge.png">
 
 We are proud that QANX smart contract passed CertiK's audit excellently. You can find the audit report [here](./audit/REP-QANX-2021-05-28.pdf).
 
@@ -40,7 +62,7 @@ Other than QANX the audit firm CertiK was also assigned to audit the recognizabl
 
 ---
 
-## Audit by Hacken <img align="right" src="./audit/hacken-badge.png">
+### Audit by Hacken <img align="right" src="./audit/hacken-badge.png">
 
 We are proud that QANX smart contract passed Hacken's audit excellently. You can find the audit report [here](./audit/Hacken-QANplatform-29032022.pdf).
 
