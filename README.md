@@ -33,7 +33,7 @@ The following modifications were done to the base contracts to optimize gas fees
 
 ### Audit by Omniscia <img align="right" src="./audit/omniscia-badge.png">
 
-We are proud that the most recent QANX smart contract also passed Omniscia's audit excellently. You can find the latest audit report [here](https://omniscia.io/reports/qanx-token-round-2-63f2293c95190c0014d649c7/).
+We are proud that the most recent QANX smart contract also passed Omniscia's audit excellently. You can find the latest audit report [here](./audit/Omniscia-QANplatform-20022023.pdf).
 
 Omniscia is a leading Web3 security firm with deep experience securing and optimizing complex smart contracts and blockchain networks.
 
