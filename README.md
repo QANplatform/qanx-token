@@ -10,8 +10,8 @@ In the current iteration this functionality is removed from the QANX token contr
 
 You can browse the live instances of QANX smart contracts below:
 
-- ETH (ERC20): [TBA](#) [ Ethereum ]
-- BSC (BEP20): [TBA](#) [ Binance Smart Chain ]
+- ETH (ERC20): [0xAAA9214F675316182Eaa21C85f0Ca99160CC3AAA](https://etherscan.io/address/0xAAA9214F675316182Eaa21C85f0Ca99160CC3AAA) [ Ethereum ]
+- BSC (BEP20): [0xAAA9214F675316182Eaa21C85f0Ca99160CC3AAA](https://bscscan.com/address/0xAAA9214F675316182Eaa21C85f0Ca99160CC3AAA) [ Binance Smart Chain ]
 
 ---
 
